@@ -5,12 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f7f8fb" />
     <title>Codlyio Studio — Office</title>
+    <script>
+      try {
+        document.documentElement.classList.toggle("light-theme", localStorage.getItem("codly-studio-theme") !== "dark");
+      } catch {
+        document.documentElement.classList.add("light-theme");
+      }
+    </script>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <div class="shell">
       <aside class="sidebar">
-        <div class="brand"><img class="brand-logo" src="/brand-mark.png" alt=""><span>Codlyio Studio</span></div>
+        <div class="brand"><img class="brand-logo" src="/brand-mark.png?v=2" alt=""><span>Codlyio Studio</span></div>
         <nav id="side-nav" aria-label="Ana menü">
           <button class="nav-item active" data-page="office"><span class="nav-icon">⌂</span>Office</button>
           <button class="nav-item" data-page="manager"><span class="nav-icon">◌</span>Manager</button>
@@ -48,6 +55,7 @@
         <button class="workspace-switch" id="workspace-switch">Codlyio Studio <span>⌄</span></button>
         <div class="topbar-actions">
           <span class="live-pill" id="runtime-indicator"><span class="online-dot" id="runtime-pill-dot"></span> Connecting…</span>
+          <button class="theme-toggle" data-theme-toggle type="button" aria-label="Koyu temaya geç" title="Koyu temaya geç"><span aria-hidden="true">☾</span><span data-theme-label>Koyu tema</span></button>
           <button class="icon-button" id="notifications-button" aria-label="Notifications">♧<span class="notification-dot"></span></button>
           <button class="stop-button" id="stop-all">⊗ <span>Stop all</span></button>
           <button class="user-avatar" id="account-menu" aria-label="Account">Y</button>

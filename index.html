@@ -9,13 +9,20 @@
     <meta property="og:description" content="Modellerini uzman rollere bağla. İşleri tek merkezden yönet. İlerlemeyi canlı ofisinde gör." />
     <meta property="og:type" content="website" />
     <title>Codlyio Studio — Yapay zekâ ekibin, tek çalışma alanında</title>
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/brand-mark.png?v=2" type="image/png" />
+    <script>
+      try {
+        document.documentElement.classList.toggle("light-theme", localStorage.getItem("codly-studio-theme") !== "dark");
+      } catch {
+        document.documentElement.classList.add("light-theme");
+      }
+    </script>
     <link rel="stylesheet" href="/landing.css" />
   </head>
   <body>
     <header class="site-header">
       <a class="brand" href="/" aria-label="Codlyio Studio ana sayfa">
-        <img class="brand-mark" src="/brand-mark.png" alt="" />
+        <img class="brand-mark" src="/brand-mark.png?v=2" alt="" />
         <span class="brand-name">codlyio<span>studio</span></span>
       </a>
 
@@ -27,6 +34,7 @@
 
       <div class="header-actions">
         <a class="header-login" href="https://studio.codlyio.com">Giriş yap</a>
+        <button class="theme-toggle" data-theme-toggle type="button" aria-label="Koyu temaya geç" title="Koyu temaya geç"><span aria-hidden="true">☾</span><span data-theme-label>Koyu tema</span></button>
         <a class="button button-small" href="https://studio.codlyio.com">Studio’yu aç <span aria-hidden="true">↗</span></a>
       </div>
 
@@ -75,7 +83,7 @@
             </div>
             <div class="preview-app">
               <aside class="preview-sidebar" aria-hidden="true">
-                <img class="preview-logo" src="/brand-mark.png" alt="" />
+                <img class="preview-logo" src="/brand-mark.png?v=2" alt="" />
                 <div class="preview-nav-item selected"><span>⌂</span></div>
                 <div class="preview-nav-item"><span>☷</span></div>
                 <div class="preview-nav-item"><span>▣</span></div>
@@ -269,11 +277,27 @@
     </main>
 
     <footer class="site-footer page-width">
-      <a class="brand" href="/" aria-label="Codlyio Studio ana sayfa"><img class="brand-mark" src="/brand-mark.png" alt=""><span class="brand-name">codlyio<span>studio</span></span></a>
+      <a class="brand" href="/" aria-label="Codlyio Studio ana sayfa"><img class="brand-mark" src="/brand-mark.png?v=2" alt=""><span class="brand-name">codlyio<span>studio</span></span></a>
       <p>İnsanların yön verdiği, yapay zekânın birlikte ürettiği çalışma alanı.</p>
       <span class="footer-copy">© 2026 Codlyio Studio</span>
     </footer>
     <script>
+      const studioThemeButton = document.querySelector("[data-theme-toggle]");
+      const updateStudioThemeButton = () => {
+        const light = document.documentElement.classList.contains("light-theme");
+        const label = light ? "Koyu tema" : "Açık tema";
+        const action = light ? "Koyu temaya geç" : "Açık temaya geç";
+        studioThemeButton.setAttribute("aria-label", action);
+        studioThemeButton.title = action;
+        studioThemeButton.querySelector("[data-theme-label]").textContent = label;
+        studioThemeButton.querySelector("[aria-hidden]").textContent = light ? "☾" : "☀";
+      };
+      updateStudioThemeButton();
+      studioThemeButton.addEventListener("click", () => {
+        const light = document.documentElement.classList.toggle("light-theme");
+        localStorage.setItem("codly-studio-theme", light ? "light" : "dark");
+        updateStudioThemeButton();
+      });
       if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
         document.querySelectorAll('a[href="https://studio.codlyio.com"]').forEach((link) => {
           link.href = "/office";

@@ -6,6 +6,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
 
   const STORE = "codly-office-demo-v1";
   const OWNER_STORE = "codly-office-cloud-owner-v1";
+  const THEME_STORE = "codly-studio-theme";
   const MAX_MAP_SCALE = 4.5;
   const PROVIDERS = ["OpenAI-compatible", "Anthropic", "Google Gemini", "OpenRouter", "Ollama", "LM Studio", "Custom endpoint"];
   const PROVIDER_URLS = {
@@ -17,6 +18,19 @@ import { createWorkspaceStore } from "./workspace-store.js";
     "LM Studio": "http://localhost:1234/v1",
     "Custom endpoint": ""
   };
+  function applyStudioTheme(theme) {
+    const light = theme === "light";
+    document.documentElement.classList.toggle("light-theme", light);
+    localStorage.setItem(THEME_STORE, light ? "light" : "dark");
+    const button = document.querySelector("[data-theme-toggle]");
+    if (button) {
+      button.querySelector("[data-theme-label]").textContent = light ? "Koyu tema" : "Açık tema";
+      button.querySelector("[aria-hidden]").textContent = light ? "☾" : "☀";
+      button.setAttribute("aria-label", light ? "Koyu temaya geç" : "Açık temaya geç");
+      button.title = light ? "Koyu temaya geç" : "Açık temaya geç";
+    }
+  }
+  applyStudioTheme(localStorage.getItem(THEME_STORE) === "dark" ? "dark" : "light");
   const SEED_EMPLOYEES = [
     ["Alex", "Chief AI Manager", "Executive", "Reasoning", "Planning · Delegation · Coordination"],
     ["Oliver", "Research Analyst", "Research", "Balanced", "Market research · Web research · Source analysis"],
@@ -244,7 +258,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
     authNotice = message || "";
     authNoticeIsError = Boolean(isError);
     const signup = authMode === "signup";
-    authScreen.innerHTML = '<section class="auth-card"><div class="brand auth-brand"><img class="brand-logo" src="/brand-mark.png" alt=""><span>Codlyio Studio</span></div><p class="eyebrow">YOUR AI WORKSPACE</p><h1>' + (signup ? "Create your account" : "Welcome back") + '</h1><p class="auth-subtitle">' + (signup ? "Create an account to keep your team and workspace in sync across devices." : "Sign in to open your workspace on this device.") + '</p>' + (authNotice ? '<div class="auth-notice ' + (authNoticeIsError ? "error" : "") + '">' + esc(authNotice) + '</div>' : '') + '<form id="auth-form"><label class="auth-field"><span>Email</span><input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label><label class="auth-field"><span>Password</span><input name="password" type="password" autocomplete="' + (signup ? "new-password" : "current-password") + '" minlength="8" required placeholder="At least 8 characters"></label><button class="button primary auth-submit" type="submit">' + (signup ? "Create account" : "Sign in") + '</button></form><button class="auth-switch" type="button" data-auth-mode="' + (signup ? "signin" : "signup") + '">' + (signup ? "Already have an account? Sign in" : "New to Codlyio Studio? Create an account") + '</button><p class="auth-footnote">Your model provider keys stay on the local runtime and are not included in workspace sync.</p></section>';
+    authScreen.innerHTML = '<section class="auth-card"><div class="brand auth-brand"><img class="brand-logo" src="/brand-mark.png?v=2" alt=""><span>Codlyio Studio</span></div><p class="eyebrow">YOUR AI WORKSPACE</p><h1>' + (signup ? "Create your account" : "Welcome back") + '</h1><p class="auth-subtitle">' + (signup ? "Create an account to keep your team and workspace in sync across devices." : "Sign in to open your workspace on this device.") + '</p>' + (authNotice ? '<div class="auth-notice ' + (authNoticeIsError ? "error" : "") + '">' + esc(authNotice) + '</div>' : '') + '<form id="auth-form"><label class="auth-field"><span>Email</span><input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label><label class="auth-field"><span>Password</span><input name="password" type="password" autocomplete="' + (signup ? "new-password" : "current-password") + '" minlength="8" required placeholder="At least 8 characters"></label><button class="button primary auth-submit" type="submit">' + (signup ? "Create account" : "Sign in") + '</button></form><button class="auth-switch" type="button" data-auth-mode="' + (signup ? "signin" : "signup") + '">' + (signup ? "Already have an account? Sign in" : "New to Codlyio Studio? Create an account") + '</button><p class="auth-footnote">Your model provider keys stay on the local runtime and are not included in workspace sync.</p></section>';
     authScreen.classList.remove("hidden");
     if (workspaceOnboarding) workspaceOnboarding.classList.add("hidden");
     document.querySelector(".shell").classList.add("hidden");
@@ -255,7 +269,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
     const profile = state.workspaceProfile || {};
     const type = profile.type || "Company";
     const industry = profile.industry || "";
-    workspaceOnboarding.innerHTML = '<section class="onboarding-card"><div class="brand onboarding-brand"><img class="brand-logo" src="/brand-mark.png" alt=""><span>Codlyio Studio</span></div><p class="eyebrow">LET’S SET UP YOUR SPACE</p><h1>Tell us what you’re building</h1><p class="auth-subtitle">Add a few details about your company or personal workspace. This profile is saved to your account and can shape your Studio experience.</p><form id="workspace-profile-form"><label class="auth-field"><span>Workspace name</span><input name="name" maxlength="60" required value="' + esc(profile.name || state.settings.workspaceName || "") + '" placeholder="e.g. Acme Studio"></label><div class="onboarding-grid"><label class="auth-field"><span>Workspace type</span><select name="type"><option value="Company"' + (type === "Company" ? " selected" : "") + '>Company</option><option value="Personal"' + (type === "Personal" ? " selected" : "") + '>Personal workspace</option></select></label><label class="auth-field"><span>Industry</span><select name="industry"><option value="">Choose an industry</option><option' + (industry === "Technology" ? " selected" : "") + '>Technology</option><option' + (industry === "Creative" ? " selected" : "") + '>Creative & design</option><option' + (industry === "Marketing" ? " selected" : "") + '>Marketing</option><option' + (industry === "E-commerce" ? " selected" : "") + '>E-commerce</option><option' + (industry === "Education" ? " selected" : "") + '>Education</option><option' + (industry === "Other" ? " selected" : "") + '>Other</option></select></label></div><label class="auth-field"><span>What do you want to build?</span><textarea name="description" maxlength="280" rows="3" placeholder="Briefly describe your company, project, or goals…">' + esc(profile.description || "") + '</textarea></label><label class="auth-field"><span>Website <em>optional</em></span><input name="website" type="url" maxlength="200" value="' + esc(profile.website || "") + '" placeholder="https://example.com"></label><button class="button primary auth-submit" type="submit">Save workspace and continue</button></form><p class="auth-footnote">Your workspace profile is saved to your account and synced across your devices.</p></section>';
+    workspaceOnboarding.innerHTML = '<section class="onboarding-card"><div class="brand onboarding-brand"><img class="brand-logo" src="/brand-mark.png?v=2" alt=""><span>Codlyio Studio</span></div><p class="eyebrow">LET’S SET UP YOUR SPACE</p><h1>Tell us what you’re building</h1><p class="auth-subtitle">Add a few details about your company or personal workspace. This profile is saved to your account and can shape your Studio experience.</p><form id="workspace-profile-form"><label class="auth-field"><span>Workspace name</span><input name="name" maxlength="60" required value="' + esc(profile.name || state.settings.workspaceName || "") + '" placeholder="e.g. Acme Studio"></label><div class="onboarding-grid"><label class="auth-field"><span>Workspace type</span><select name="type"><option value="Company"' + (type === "Company" ? " selected" : "") + '>Company</option><option value="Personal"' + (type === "Personal" ? " selected" : "") + '>Personal workspace</option></select></label><label class="auth-field"><span>Industry</span><select name="industry"><option value="">Choose an industry</option><option' + (industry === "Technology" ? " selected" : "") + '>Technology</option><option' + (industry === "Creative" ? " selected" : "") + '>Creative & design</option><option' + (industry === "Marketing" ? " selected" : "") + '>Marketing</option><option' + (industry === "E-commerce" ? " selected" : "") + '>E-commerce</option><option' + (industry === "Education" ? " selected" : "") + '>Education</option><option' + (industry === "Other" ? " selected" : "") + '>Other</option></select></label></div><label class="auth-field"><span>What do you want to build?</span><textarea name="description" maxlength="280" rows="3" placeholder="Briefly describe your company, project, or goals…">' + esc(profile.description || "") + '</textarea></label><label class="auth-field"><span>Website <em>optional</em></span><input name="website" type="url" maxlength="200" value="' + esc(profile.website || "") + '" placeholder="https://example.com"></label><button class="button primary auth-submit" type="submit">Save workspace and continue</button></form><p class="auth-footnote">Your workspace profile is saved to your account and synced across your devices.</p></section>';
     if (authScreen) authScreen.classList.add("hidden");
     workspaceOnboarding.classList.remove("hidden");
     document.querySelector(".shell").classList.add("hidden");
@@ -1215,6 +1229,11 @@ import { createWorkspaceStore } from "./workspace-store.js";
 
   document.addEventListener("click", function (event) {
     const target = event.target;
+    const themeToggle = target.closest("[data-theme-toggle]");
+    if (themeToggle) {
+      applyStudioTheme(document.documentElement.classList.contains("light-theme") ? "dark" : "light");
+      return;
+    }
     const authModeButton = target.closest("[data-auth-mode]");
     if (authModeButton) {
       authMode = authModeButton.dataset.authMode;

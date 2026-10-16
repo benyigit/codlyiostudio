@@ -17,6 +17,7 @@
   --sans: "Avenir Next", "Segoe UI Variable", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+html { filter: grayscale(1); }
 * { box-sizing: border-box; }
 html, body { width: 100%; height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); }
 button, input, textarea, select { font: inherit; }
@@ -25,6 +26,7 @@ button { color: inherit; }
 .sidebar { grid-column: 1; grid-row: 1 / 3; display: flex; flex-direction: column; min-height: 0; padding: 13px 11px 10px; background: #101010; border-right: 1px solid #242424; }
 .brand { display: flex; align-items: center; gap: 9px; height: 31px; margin: 1px 9px 15px; color: #f2f0ea; font-family: var(--serif); font-size: 16px; letter-spacing: -.5px; }
 .brand-mark { display: grid; place-items: center; width: 21px; height: 21px; border: 1px solid #8d7ef4; border-radius: 50%; color: #c7beff; font-family: var(--serif); font-size: 13px; }
+.brand-logo { display: block; flex: 0 0 auto; width: 23px; height: 23px; object-fit: contain; filter: brightness(0) invert(1); }
 #side-nav { min-height: 0; overflow: auto; scrollbar-width: thin; scrollbar-color: #333 transparent; }
 .nav-label { margin: 17px 10px 7px; color: #777773; font-size: 10px; font-weight: 600; letter-spacing: .11em; }
 .nav-item { position: relative; display: flex; align-items: center; width: 100%; height: 33px; padding: 0 10px; gap: 11px; border: 0; border-radius: 8px; background: transparent; color: #b3b2ae; text-align: left; font-size: 12.5px; cursor: pointer; transition: background .16s ease, color .16s ease; }
@@ -43,6 +45,8 @@ button { color: inherit; }
 .topbar-actions { display: flex; align-items: center; gap: 15px; }
 .live-pill { display: flex; align-items: center; gap: 7px; color: #aaa9a5; font-size: 10px; }
 .icon-button { position: relative; display: grid; place-items: center; width: 28px; height: 28px; border: 0; background: transparent; color: #aaa9a4; font-size: 16px; cursor: pointer; }
+.theme-toggle { display: inline-flex; min-height: 30px; align-items: center; justify-content: center; gap: 6px; padding: 0 9px; border: 1px solid #353535; border-radius: 8px; background: #191919; color: #f1f1f1; font-size: 10px; cursor: pointer; white-space: nowrap; }
+.theme-toggle:hover { background: #252525; }
 .notification-dot { position: absolute; right: 3px; top: 3px; width: 5px; height: 5px; border-radius: 50%; background: #9484ef; }
 .stop-button { display: inline-flex; align-items: center; gap: 6px; padding: 7px 11px; border: 1px solid #4b3434; border-radius: 7px; background: transparent; color: #dfa19a; font-size: 11px; cursor: pointer; }
 .stop-button:hover { background: #281c1c; }
@@ -350,7 +354,8 @@ tr[data-employee]:hover td { background: #1a1a1a; }
   .model-grid { grid-template-columns: 1fr; }
 }
 
-:root {
+@scope (:root.light-theme) {
+:scope {
   color-scheme: light;
   --bg: #f5f7fb;
   --panel: #ffffff;
@@ -370,7 +375,7 @@ tr[data-employee]:hover td { background: #1a1a1a; }
 .sidebar, .topbar, .view, .manager-panel, .settings-tabs { background: #fff; }
 .sidebar { border-right-color: var(--line); }
 .brand { color: #252735; }
-.brand-logo { width: 23px; height: 23px; object-fit: contain; filter: brightness(0); }
+.brand-logo { filter: brightness(0); }
 .nav-label, .sidebar-foot, .muted, .field-help, .page-subtitle, .card p, .card-meta,
 .summary-meta, .live-pill, .composer-hint, .demo-note, .metric-label, .workflow-row span,
 .integration-card p, .team-person-status, .profile-role, .setting-row span:last-child { color: #70798b; }
@@ -445,8 +450,11 @@ td, .setting-row, .meeting-participant { border-color: var(--line); color: #4148
 .onboarding-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
 .workspace-profile-summary { display: grid; gap: 5px; margin: 12px 0 17px; padding: 12px; border: 1px solid #e5e2f6; border-radius: 9px; background: #f7f5ff; color: #4b3eb5; font-size: 10px; }
 .workspace-profile-summary span { color: #687083; line-height: 1.5; }
+.theme-toggle { border-color: #dfe3eb; background: #fff; color: #252735; }
+.theme-toggle:hover { background: #f3f5f9; }
 
 @media (max-width: 620px) {
   .auth-card, .onboarding-card { padding: 27px 21px; }
   .onboarding-grid { grid-template-columns: 1fr; gap: 0; }
+}
 }
