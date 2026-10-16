@@ -24,6 +24,12 @@ Codlyio Studio, yapay zekâ çalışanlarını tek bir çalışma alanında orga
 `index.html` dosyasını doğrudan açmak yeterli değildir; model istekleri aynı yerel sunucudaki API'ye gider.
 3D sahne güncel bir WebGL destekli tarayıcı gerektirir.
 
+## Vercel dağıtımı
+
+`vercel.json`, Vercel'i statik dağıtım moduna alır ve `npm run build` ile `/` tanıtım sayfası ile `/office` arayüzünü `dist/` içine hazırlar. Supabase Auth'ı web dağıtımında açmak için Vercel Project Settings → Environment Variables bölümünde `CODLY_SUPABASE_URL` ve `CODLY_SUPABASE_PUBLISHABLE_KEY` değişkenlerini Preview ve Production ortamlarına ekleyin. `/api/config` bu iki istemci ayarını uygulamaya verir.
+
+Model isteklerini çalıştıran `/api/chat` ve model rotalarını yöneten runtime şu an yalnızca `npm start` ile yerel makinede çalışır. Vercel'de arayüz yayınlanır; ortak, uzaktan erişilebilir model runtime'ı için Hetzner dağıtımı ayrıca tamamlanmalıdır.
+
 ## Bu dilimde çalışanlar
 
 - Three.js tabanlı 3D Office, çalışanların masa/kafe/toplantı alanlarına hareketi ve gerçek görev durumları
