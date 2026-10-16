@@ -23,10 +23,12 @@
 .legal-footer nav a:hover { color: var(--text); }
 .legal-footer .brand-mark { width: 28px; height: 28px; }
 .legal-footer .brand-name { font-size: 13px; }
+.legal-footer-meta { display: flex; align-items: center; gap: 14px; }
 @media (max-width: 620px) {
   .legal-main { width: calc(100% - 36px); padding-top: 32px; padding-bottom: 74px; }
   .legal-back { margin-bottom: 42px; }
   .legal-section { grid-template-columns: 27px minmax(0,1fr); gap: 9px; padding: 22px 0; }
   .legal-contact { align-items: flex-start; flex-direction: column; }
   .legal-footer { width: calc(100% - 36px); padding: 16px 0; align-items: flex-start; flex-direction: column; }
+  .legal-footer-meta { width: 100%; justify-content: space-between; }
 }

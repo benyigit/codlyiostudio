@@ -34,7 +34,6 @@
 
       <div class="header-actions">
         <a class="header-login" href="https://studio.codlyio.com">Giriş yap</a>
-        <button class="theme-toggle" data-theme-toggle type="button" aria-label="Koyu temaya geç" title="Koyu temaya geç"><span data-theme-icon aria-hidden="true">☾</span><span data-theme-label>Koyu tema</span></button>
         <a class="button button-small" href="https://studio.codlyio.com">Studio’yu aç <span aria-hidden="true">↗</span></a>
       </div>
 
@@ -308,11 +307,18 @@
       </div>
       <div class="footer-watermark" aria-hidden="true">codlyio</div>
       <div class="footer-bottom">
-        <span class="footer-copy">© 2026 Codlyio Studio. Tüm hakları saklıdır.</span>
-        <span class="footer-location">İstanbul, Türkiye</span>
-        <button class="footer-back-top" data-back-to-top type="button">Başa dön <span aria-hidden="true">↑</span></button>
+        <span class="footer-copy">© 2026 Codlyio LLC. Tüm hakları saklıdır.</span>
+        <span class="footer-location">Texas, USA</span>
+        <div class="footer-preferences">
+          <div class="language-picker" role="group" aria-label="Dil">
+            <button type="button" data-language-choice="tr" aria-label="Türkçe" aria-pressed="true">TR</button>
+            <button type="button" data-language-choice="en" aria-label="English" aria-pressed="false">EN</button>
+          </div>
+          <button class="footer-back-top" data-back-to-top type="button" aria-label="Başa dön">Başa dön <span aria-hidden="true">↑</span></button>
+        </div>
       </div>
     </footer>
+    <script src="/i18n.js" defer></script>
     <script src="/theme.js" defer></script>
   </body>
 </html>

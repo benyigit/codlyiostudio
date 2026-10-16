@@ -15,6 +15,7 @@ const staticFiles = [
   "legal.css",
   "legal.js",
   "theme.js",
+  "i18n.js",
   "privacy.html",
   "terms.html",
   "cookies.html",

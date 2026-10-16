@@ -8,6 +8,9 @@ import { createWorkspaceStore } from "./workspace-store.js";
   const OWNER_STORE = "codly-office-cloud-owner-v1";
   const THEME_STORE = "codly-studio-theme";
   const MAX_MAP_SCALE = 4.5;
+  function studioLocale() {
+    return window.codlyioI18n?.getLanguage() === "en" ? "en-US" : "tr-TR";
+  }
   const PROVIDERS = ["OpenAI-compatible", "Anthropic", "Google Gemini", "OpenRouter", "Ollama", "LM Studio", "Custom endpoint"];
   const PROVIDER_URLS = {
     "OpenAI-compatible": "https://api.openai.com/v1",
@@ -21,16 +24,9 @@ import { createWorkspaceStore } from "./workspace-store.js";
   function applyStudioTheme(theme) {
     const light = theme === "light";
     document.documentElement.classList.toggle("light-theme", light);
-    localStorage.setItem(THEME_STORE, light ? "light" : "dark");
-    const button = document.querySelector("[data-theme-toggle]");
-    if (button) {
-      button.querySelector("[data-theme-label]").textContent = light ? "Koyu tema" : "Açık tema";
-      button.querySelector("[aria-hidden]").textContent = light ? "☾" : "☀";
-      button.setAttribute("aria-label", light ? "Koyu temaya geç" : "Açık temaya geç");
-      button.title = light ? "Koyu temaya geç" : "Açık temaya geç";
-    }
+    window.codlyioI18n?.setTheme(light ? "light" : "dark");
   }
-  applyStudioTheme(localStorage.getItem(THEME_STORE) === "dark" ? "dark" : "light");
+  applyStudioTheme(window.codlyioI18n?.getTheme() || (localStorage.getItem(THEME_STORE) === "dark" ? "dark" : "light"));
   const SEED_EMPLOYEES = [
     ["Alex", "Chief AI Manager", "Executive", "Reasoning", "Planning · Delegation · Coordination"],
     ["Oliver", "Research Analyst", "Research", "Balanced", "Market research · Web research · Source analysis"],
@@ -498,7 +494,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
     ].map(function (text) { return '<button class="suggestion" data-suggestion="' + esc(text) + '">' + esc(text) + '</button>'; }).join("");
     let body = "";
     if (isActivity) {
-      body = state.activity.length ? '<div class="activity-list">' + state.activity.map(function (item) { return '<div class="activity-item"><span class="activity-marker"></span><span>' + esc(item.text) + '<br><span class="muted">' + new Date(item.time).toLocaleString() + '</span></span></div>'; }).join("") + '</div>' : '<p class="chat-manager">Nothing has happened yet. The activity stream will appear here when the team starts work.</p>';
+      body = state.activity.length ? '<div class="activity-list">' + state.activity.map(function (item) { return '<div class="activity-item"><span class="activity-marker"></span><span>' + esc(item.text) + '<br><span class="muted">' + new Date(item.time).toLocaleString(studioLocale()) + '</span></span></div>'; }).join("") + '</div>' : '<p class="chat-manager">Nothing has happened yet. The activity stream will appear here when the team starts work.</p>';
     } else if (state.busyManager) {
       body = '<p class="manager-intro">Manager is turning your outcome into a team plan…</p><p class="demo-note">Your prompt is being sent to the Manager’s configured provider.</p>';
     } else if (state.goals.length) {
@@ -529,7 +525,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
   function goalCard(goal) {
     const tasks = Array.isArray(goal.tasks) ? goal.tasks : [];
     const action = goal.status === "Planned" || goal.status === "Needs attention" ? '<button class="button small" data-action="run-goal" data-goal="' + esc(goal.id) + '" ' + (state.runningGoalId ? "disabled" : "") + '>Run team</button>' : "";
-    return '<article class="workflow-row"><div><strong>' + esc(goal.title) + '</strong><span>' + tasks.length + ' tasks · ' + new Date(goal.createdAt).toLocaleString() + '</span></div><span class="status-badge">' + esc(goal.status) + '</span>' + action + '</article>';
+    return '<article class="workflow-row"><div><strong>' + esc(goal.title) + '</strong><span>' + tasks.length + ' tasks · ' + new Date(goal.createdAt).toLocaleString(studioLocale()) + '</span></div><span class="status-badge">' + esc(goal.status) + '</span>' + action + '</article>';
   }
 
   function renderTasks() {
@@ -552,7 +548,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
   }
 
   function renderProjects() {
-    return '<div class="page">' + pageHeader("Projects", "Goals are grouped here. Persistent project memory and artifact storage are planned for a later slice.") + (state.goals.length ? '<div class="card-grid">' + state.goals.map(function (goal) { return '<article class="card"><p class="eyebrow">PROJECT · ' + new Date(goal.createdAt).toLocaleDateString() + '</p><h3>' + esc(goal.title) + '</h3><p>' + (Array.isArray(goal.tasks) ? goal.tasks.length : 0) + ' planned tasks · ' + esc(goal.status) + '</p><div class="card-meta"><span class="online-dot"></span> Goal workspace</div></article>'; }).join("") + '</div>' : '<div class="empty-state"><strong>No projects yet</strong>A project is created when the Manager plans a goal.</div>') + '</div>';
+    return '<div class="page">' + pageHeader("Projects", "Goals are grouped here. Persistent project memory and artifact storage are planned for a later slice.") + (state.goals.length ? '<div class="card-grid">' + state.goals.map(function (goal) { return '<article class="card"><p class="eyebrow">PROJECT · ' + new Date(goal.createdAt).toLocaleDateString(studioLocale()) + '</p><h3>' + esc(goal.title) + '</h3><p>' + (Array.isArray(goal.tasks) ? goal.tasks.length : 0) + ' planned tasks · ' + esc(goal.status) + '</p><div class="card-meta"><span class="online-dot"></span> Goal workspace</div></article>'; }).join("") + '</div>' : '<div class="empty-state"><strong>No projects yet</strong>A project is created when the Manager plans a goal.</div>') + '</div>';
   }
 
   function renderDevelopment() {
@@ -568,8 +564,8 @@ import { createWorkspaceStore } from "./workspace-store.js";
   }
 
   function renderActivity() {
-    const meetings = state.meetings.length ? '<h2 class="serif" style="margin-top:24px;font-size:22px;font-weight:400">Meeting notes</h2><div class="meeting-history">' + state.meetings.slice(0, 10).map(function (meeting) { const names = meeting.participantNames || meeting.participants.map(function (id) { return employee(id)?.name || "Employee"; }); return '<article class="card"><p class="eyebrow">' + new Date(meeting.createdAt).toLocaleString() + ' · ' + names.map(esc).join(", ") + '</p><h3>' + esc(meeting.subject) + '</h3><p>' + esc(meeting.summary || "No model summary was produced.") + '</p>' + (meeting.notes ? '<pre class="task-output">' + esc(meeting.notes) + '</pre>' : '') + '</article>'; }).join("") + '</div>' : '';
-    const rows = state.activity.length ? '<div class="activity-list">' + state.activity.map(function (item) { return '<div class="activity-item"><span class="activity-marker"></span><span>' + esc(item.text) + '<br><span class="muted">' + new Date(item.time).toLocaleString() + '</span></span></div>'; }).join("") + '</div>' : '<div class="empty-state"><strong>No activity yet</strong>Everything the team does will appear here.</div>';
+    const meetings = state.meetings.length ? '<h2 class="serif" style="margin-top:24px;font-size:22px;font-weight:400">Meeting notes</h2><div class="meeting-history">' + state.meetings.slice(0, 10).map(function (meeting) { const names = meeting.participantNames || meeting.participants.map(function (id) { return employee(id)?.name || "Employee"; }); return '<article class="card"><p class="eyebrow">' + new Date(meeting.createdAt).toLocaleString(studioLocale()) + ' · ' + names.map(esc).join(", ") + '</p><h3>' + esc(meeting.subject) + '</h3><p>' + esc(meeting.summary || "No model summary was produced.") + '</p>' + (meeting.notes ? '<pre class="task-output">' + esc(meeting.notes) + '</pre>' : '') + '</article>'; }).join("") + '</div>' : '';
+    const rows = state.activity.length ? '<div class="activity-list">' + state.activity.map(function (item) { return '<div class="activity-item"><span class="activity-marker"></span><span>' + esc(item.text) + '<br><span class="muted">' + new Date(item.time).toLocaleString(studioLocale()) + '</span></span></div>'; }).join("") + '</div>' : '<div class="empty-state"><strong>No activity yet</strong>Everything the team does will appear here.</div>';
     return '<div class="page">' + pageHeader("Activity", "Everything your team did, as it happened.") + '<div class="setting-row"><span>Show system events</span><button class="switch ' + (state.settings.showSystemEvents ? "on" : "") + '" data-setting-switch="showSystemEvents" aria-label="Show system events"></button></div>' + meetings + rows + '</div>';
   }
 
@@ -596,7 +592,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
   }
 
   function renderCalendar() {
-    return '<div class="page">' + pageHeader("Calendar", "Planned posts, shown in your workspace time zone.") + '<div class="calendar-toolbar"><div><h2 class="serif" style="margin:0;font-size:23px;font-weight:400">' + state.calendarDate.toLocaleString(undefined, { month: "long", year: "numeric" }) + '</h2><span class="muted" style="font-size:9px">Europe/Istanbul · ' + state.calendarMode + ' view</span></div><div style="display:flex;gap:6px;align-items:center"><button class="button small" data-action="calendar-prev">‹</button><button class="button small" data-action="calendar-today">Today</button><button class="button small" data-action="calendar-next">›</button><button class="filter-chip ' + (state.calendarMode === "Month" ? "active" : "") + '" data-calendar-mode="Month">Month</button><button class="filter-chip ' + (state.calendarMode === "Week" ? "active" : "") + '" data-calendar-mode="Week">Week</button></div></div><div class="calendar-grid">' + calendarMarkup() + '</div><div class="empty-state" style="margin-top:15px;padding:20px">Nothing is planned for this period.</div></div>';
+    return '<div class="page">' + pageHeader("Calendar", "Planned posts, shown in your workspace time zone.") + '<div class="calendar-toolbar"><div><h2 class="serif" style="margin:0;font-size:23px;font-weight:400">' + state.calendarDate.toLocaleString(studioLocale(), { month: "long", year: "numeric" }) + '</h2><span class="muted" style="font-size:9px">Europe/Istanbul · ' + state.calendarMode + ' view</span></div><div style="display:flex;gap:6px;align-items:center"><button class="button small" data-action="calendar-prev">‹</button><button class="button small" data-action="calendar-today">Today</button><button class="button small" data-action="calendar-next">›</button><button class="filter-chip ' + (state.calendarMode === "Month" ? "active" : "") + '" data-calendar-mode="Month">Month</button><button class="filter-chip ' + (state.calendarMode === "Week" ? "active" : "") + '" data-calendar-mode="Week">Week</button></div></div><div class="calendar-grid">' + calendarMarkup() + '</div><div class="empty-state" style="margin-top:15px;padding:20px">Nothing is planned for this period.</div></div>';
   }
 
   function renderCampaigns() {
@@ -724,12 +720,14 @@ import { createWorkspaceStore } from "./workspace-store.js";
   }
 
   function renderSettings() {
+    const interfaceLanguage = window.codlyioI18n?.getLanguage() || "tr";
+    const interfaceTheme = window.codlyioI18n?.getTheme() || (localStorage.getItem(THEME_STORE) === "dark" ? "dark" : "light");
     const tabs = SETTINGS_TABS.map(function (tab) { return '<button class="settings-tab ' + (state.settingsTab === tab ? "active" : "") + '" data-settings-tab="' + esc(tab) + '">' + esc(tab) + '</button>'; }).join("");
     let content = "";
     if (state.settingsTab === "General") {
-      content = '<h2>General</h2><div class="field"><label>Workspace name</label><input value="' + esc((state.workspaceProfile && state.workspaceProfile.name) || state.settings.workspaceName || "Codlyio Studio") + '" data-workspace-name></div>' + (state.workspaceProfile ? '<div class="workspace-profile-summary"><strong>' + esc(state.workspaceProfile.type || "Workspace") + (state.workspaceProfile.industry ? ' · ' + esc(state.workspaceProfile.industry) : '') + '</strong><span>' + esc(state.workspaceProfile.description || "Workspace profile saved to your account.") + '</span></div>' : '') + '<div class="field"><label>Time zone</label><select data-time-zone><option>Europe/Istanbul</option><option>UTC</option><option>Europe/London</option><option>America/New York</option></select></div><button class="button" data-action="save-general">Save</button>' + settingRow("Model runtime", state.apiOnline ? "Local runtime" : "Runtime offline") + settingRow("Workspace sync", cloudUser ? cloudSyncStatus : "Local only") + (cloudUser ? settingRow("Account", esc(cloudUser.email || "Signed in")) : "") + settingRow("Your role", "Owner");
+      content = '<h2>General</h2><div class="field"><label>Workspace name</label><input value="' + esc((state.workspaceProfile && state.workspaceProfile.name) || state.settings.workspaceName || "Codlyio Studio") + '" data-workspace-name></div>' + (state.workspaceProfile ? '<div class="workspace-profile-summary"><strong>' + esc(state.workspaceProfile.type || "Workspace") + (state.workspaceProfile.industry ? ' · ' + esc(state.workspaceProfile.industry) : '') + '</strong><span>' + esc(state.workspaceProfile.description || "Workspace profile saved to your account.") + '</span></div>' : '') + '<div class="field"><label>Interface theme</label><select data-theme-setting><option value="light" ' + (interfaceTheme === "light" ? "selected" : "") + '>Light</option><option value="dark" ' + (interfaceTheme === "dark" ? "selected" : "") + '>Dark</option></select><span class="field-help">Choose the appearance used on this device.</span></div><div class="field"><label>Time zone</label><select data-time-zone><option>Europe/Istanbul</option><option>UTC</option><option>Europe/London</option><option>America/New York</option></select></div><button class="button" data-action="save-general">Save</button>' + settingRow("Model runtime", state.apiOnline ? "Local runtime" : "Runtime offline") + settingRow("Workspace sync", cloudUser ? cloudSyncStatus : "Local only") + (cloudUser ? settingRow("Account", esc(cloudUser.email || "Signed in")) : "") + settingRow("Your role", "Owner");
     } else if (state.settingsTab === "Language & market") {
-      content = '<h2>Language & market</h2><div class="field"><label>Interface language</label><select data-interface-language><option>English</option><option>Türkçe</option></select><span class="field-help">The Manager’s replies can follow the interface language.</span></div><div class="field"><label>Default content language</label><input value="' + esc(state.settings.contentLanguage || "tr") + '" data-content-language></div><div class="field"><label>Default target market</label><input value="' + esc(state.settings.targetMarket || "TR") + '" data-target-market></div><button class="button" data-action="save-language">Save</button>';
+      content = '<h2>Language & market</h2><div class="field"><label>Interface language</label><select data-interface-language><option value="tr" ' + (interfaceLanguage === "tr" ? "selected" : "") + '>Türkçe</option><option value="en" ' + (interfaceLanguage === "en" ? "selected" : "") + '>English</option></select><span class="field-help">The Manager’s replies can follow the interface language.</span></div><div class="field"><label>Default content language</label><input value="' + esc(state.settings.contentLanguage || "tr") + '" data-content-language></div><div class="field"><label>Default target market</label><input value="' + esc(state.settings.targetMarket || "TR") + '" data-target-market></div><button class="button" data-action="save-language">Save</button>';
     } else if (state.settingsTab === "Brand") {
       content = '<h2>Brand brain</h2><p class="page-subtitle">Every employee can read this context before writing, designing or producing output.</p>' + ["Positioning / USP", "Target audience", "Brand voice", "Visual style", "Approved claims", "Never claim", "Preferred calls to action"].map(function (label) { const key = "brand-" + label.toLowerCase().replace(/[^a-z]+/g, "-"); return '<div class="field"><label>' + esc(label) + '</label><textarea data-setting-field="' + key + '" placeholder="Add ' + esc(label.toLowerCase()) + '…">' + esc(state.settings[key] || "") + '</textarea></div>'; }).join("") + '<button class="button" data-action="save-brand">Save brand profile</button>';
     } else if (state.settingsTab === "Autonomy & policies") {
@@ -1229,11 +1227,6 @@ import { createWorkspaceStore } from "./workspace-store.js";
 
   document.addEventListener("click", function (event) {
     const target = event.target;
-    const themeToggle = target.closest("[data-theme-toggle]");
-    if (themeToggle) {
-      applyStudioTheme(document.documentElement.classList.contains("light-theme") ? "dark" : "light");
-      return;
-    }
     const authModeButton = target.closest("[data-auth-mode]");
     if (authModeButton) {
       authMode = authModeButton.dataset.authMode;
@@ -1378,6 +1371,15 @@ import { createWorkspaceStore } from "./workspace-store.js";
 
   document.addEventListener("change", function (event) {
     const input = event.target;
+    if (input.matches("[data-interface-language]")) {
+      window.codlyioI18n?.setLanguage(input.value);
+      render();
+      return;
+    }
+    if (input.matches("[data-theme-setting]")) {
+      applyStudioTheme(input.value);
+      return;
+    }
     if (input.dataset.option === "showNames") { state.showNames = input.checked; render(); }
     if (input.dataset.option === "reduceMotion") { state.reduceMotion = input.checked; render(); }
     if (input.dataset.providerFor) {

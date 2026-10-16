@@ -26,9 +26,9 @@ const documents = {
     title: "Çerez ve Tarayıcı Depolama Politikası",
     intro: "Codlyio Studio bazı tercihleri ve oturum durumunu hatırlamak için tarayıcı depolama teknolojileri kullanır.",
     sections: [
-      ["Kullanılan depolama alanları", "Tema seçimi, demo çalışma alanı ve yerel çalışma alanının hangi hesaba ait olduğunu hatırlamak için localStorage kullanılabilir. Supabase Auth, oturumun sürdürülmesi ve yenilenmesi için tarayıcı depolamasında oturum bilgisi tutar. Bunlar temel site ve hesap özelliklerini çalıştırmak içindir."],
+      ["Kullanılan depolama alanları", "Tema ve arayüz dili tercihleri codlyio.com alt alan adları arasında paylaşılabilen birinci taraf çerezde saklanabilir. Demo çalışma alanı ve yerel çalışma alanının hangi hesaba ait olduğunu hatırlamak için localStorage da kullanılabilir. Supabase Auth, oturumun sürdürülmesi ve yenilenmesi için tarayıcı depolamasında oturum bilgisi tutar. Bunlar temel site ve hesap özelliklerini çalıştırmak içindir."],
       ["Analiz ve reklam çerezleri", "Mevcut uygulama kodunda analiz veya reklam amacıyla kullanılan çerez/izleyici entegrasyonu bulunmamaktadır. İleride zorunlu olmayan analiz veya pazarlama teknolojileri eklenirse, kullanıma alınmadan önce gerekli bilgilendirme ve tercih mekanizmaları sağlanmalıdır."],
-      ["Tercihleri yönetme", "Tema tercihini sayfanın üst veya alt kısmındaki tema düğmesinden değiştirebilirsiniz. Tarayıcı ayarlarınızdan bu siteye ait depolama verilerini temizlemek oturumu ve yerel çalışma alanını silebilir; tekrar giriş yapmanız veya bulut yedeğini yeniden yüklemeniz gerekebilir."],
+      ["Tercihleri yönetme", "Tema tercihini sayfanın altındaki tema düğmesinden veya Studio içindeki Ayarlar bölümünden değiştirebilirsiniz. Tarayıcı ayarlarınızdan bu siteye ait depolama verilerini temizlemek oturumu ve yerel çalışma alanını silebilir; tekrar giriş yapmanız veya bulut yedeğini yeniden yüklemeniz gerekebilir."],
       ["Üçüncü taraf hizmetler", "Hesap ve bulut eşitleme Supabase üzerinden, yapay zekâ işlemleri seçtiğiniz model sağlayıcısı üzerinden yürütülür. Bu hizmetler kendi tarayıcı ve gizlilik teknolojilerini kullanabilir; ilgili sağlayıcıların gizlilik metinleri de geçerlidir."],
     ],
   },
@@ -77,4 +77,5 @@ if (page && content) {
     section.append(number, text);
     article.append(section);
   });
+  window.codlyioI18n?.translate(document);
 }
