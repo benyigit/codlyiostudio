@@ -145,6 +145,8 @@
     ["e.g. Acme Studio", "ör. Acme Studio"], ["Briefly describe your company, project, or goals…", "Şirketini, projen veya hedeflerini kısaca açıkla…"],
     ["Describe the outcome you want…", "İstediğin sonucu açıkla…"], ["Describe the outcome you want", "İstediğin sonucu açıkla"], ["Send", "Gönder"],
     ["Interactive 3D office", "Etkileşimli 3D ofis"], ["Zoom in", "Yakınlaştır"], ["Zoom out", "Uzaklaştır"], ["Rotate the office", "Ofisi döndür"], ["Fit the office to the screen", "Ofisi ekrana sığdır"],
+    ["Close chat panel", "Sohbet panelini kapat"], ["Open chat panel", "Sohbet panelini aç"], ["Open chat", "Sohbeti aç"],
+    ["Collapse team list", "Ekip listesini daralt"], ["Expand team list", "Ekip listesini genişlet"],
     ["Token stays in this tab", "Token bu sekmede kalır"], ["Send message", "Mesaj gönder"], ["Add instructions for this employee…", "Bu çalışan için talimat ekle…"], ["Enter a model ID", "Model kimliği gir"],
     ["Search apps", "Uygulama ara"], ["What should the team discuss?", "Ekip neyi tartışmalı?"], ["Weekly report", "Haftalık rapor"], ["Summarize last week’s work…", "Geçen haftaki çalışmaları özetle…"],
     ["Call a team meeting", "Ekip toplantısı çağır"], ["New recurring workflow", "Yeni yinelenen iş akışı"], ["Add ", "Ekle "], ["Message ", "Mesaj "],

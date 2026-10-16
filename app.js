@@ -99,6 +99,8 @@ import { createWorkspaceStore } from "./workspace-store.js";
         workspaceProfile: saved.workspaceProfile && typeof saved.workspaceProfile === "object" ? saved.workspaceProfile : null,
         currentPage: "office",
         selectedEmployee: "",
+        teamListOpen: false,
+        managerPanelOpen: true,
         managerTab: "manager",
         approvalTab: "Waiting",
         taskTab: "Goals",
@@ -123,6 +125,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
       return {
         employees: seedEmployees(), goals: [], tasks: [], workflows: [], activity: [], meetings: [], directMessages: {}, settings: {}, workspaceProfile: null,
         currentPage: "office", selectedEmployee: "", managerTab: "manager", approvalTab: "Waiting",
+        teamListOpen: false, managerPanelOpen: true,
         taskTab: "Goals", taskFilter: "All", settingsTab: "General", integrationCategory: "Popular",
         integrationSearch: "", calendarDate: new Date(), calendarMode: "Month", showNames: true,
         reduceMotion: false, mapScale: 1.1, mapRotate: 0, emergency: false,
@@ -472,7 +475,8 @@ import { createWorkspaceStore } from "./workspace-store.js";
       return '<button class="team-person" data-employee="' + esc(person.id) + '"><span class="team-color" style="background:' + color + '"></span><span class="team-person-copy"><span class="team-person-name">' + esc(person.name) + ' <span class="muted">' + esc(person.status) + '</span></span><span class="team-person-status">' + description + '</span></span></button>';
     }).join("");
     const active = state.employees.filter(function (item) { return ["Working", "Meeting", "Speaking"].includes(item.status); }).length;
-    return '<div class="team-card"><div class="team-card-head"><span>Team · ' + active + ' active</span><span>⌃</span></div>' + rows + '</div>';
+    const toggleLabel = state.teamListOpen ? "Collapse team list" : "Expand team list";
+    return '<div class="team-card' + (state.teamListOpen ? " team-card-open" : "") + '"><div class="team-card-head"><span>Team · ' + active + ' active</span><button class="team-list-toggle" type="button" data-action="toggle-team-list" aria-expanded="' + state.teamListOpen + '" aria-label="' + toggleLabel + '" title="' + toggleLabel + '">' + (state.teamListOpen ? "⌃" : "⌄") + '</button></div>' + (state.teamListOpen ? rows : "") + '</div>';
   }
 
   function renderManagerPanel() {
@@ -502,7 +506,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
     } else {
       body = '<p class="manager-intro">Tell the Manager the outcome you want. It plans the work and runs your team.</p><div class="try-label">TRY ASKING FOR</div><div class="suggestions">' + suggestions + '</div>';
     }
-    return '<section class="manager-panel"><div class="panel-tabs"><button class="panel-tab ' + (!isActivity ? "active" : "") + '" data-manager-tab="manager">Manager</button><button class="panel-tab ' + (isActivity ? "active" : "") + '" data-manager-tab="activity">Activity</button></div><div class="manager-scroll">' + body + '</div>' + (!isActivity ? '<form class="manager-composer" id="manager-form"><div class="composer-box"><textarea id="manager-input" placeholder="Describe the outcome you want…" aria-label="Describe the outcome you want" ' + (state.busyManager || state.emergency ? "disabled" : "") + '></textarea><button class="send-button" id="manager-send" type="submit" disabled aria-label="Send">↑</button></div><div class="composer-hint">Enter to send · Shift+Enter for a new line</div></form>' : '') + '</section>';
+    return '<section class="manager-panel"><div class="panel-tabs"><button class="panel-tab ' + (!isActivity ? "active" : "") + '" data-manager-tab="manager">Manager</button><button class="panel-tab ' + (isActivity ? "active" : "") + '" data-manager-tab="activity">Activity</button><button class="manager-panel-close" type="button" data-action="toggle-manager-panel" aria-label="Close chat panel" title="Close chat panel">×</button></div><div class="manager-scroll">' + body + '</div>' + (!isActivity ? '<form class="manager-composer" id="manager-form"><div class="composer-box"><textarea id="manager-input" placeholder="Describe the outcome you want…" aria-label="Describe the outcome you want" ' + (state.busyManager || state.emergency ? "disabled" : "") + '></textarea><button class="send-button" id="manager-send" type="submit" disabled aria-label="Send">↑</button></div><div class="composer-hint">Enter to send · Shift+Enter for a new line</div></form>' : '') + '</section>';
   }
 
   function renderOffice() {
@@ -514,7 +518,9 @@ import { createWorkspaceStore } from "./workspace-store.js";
     const activityBar = activity ? '<div class="office-live-activity"><div><strong>' + activityName + '</strong><span>' + esc(activity.subject || activity.participantIds.map(function (id) { return employee(id)?.name || ""; }).join(", ")) + '</span></div><button class="button small" data-action="end-office-activity">End</button></div>' : '';
     const sceneActions = activity ? '' : '<div class="office-scene-actions"><button class="button small" data-action="coffee-break">☕ Coffee break</button><button class="button small" data-action="new-meeting">＋ Call meeting</button></div>';
     const empty = !state.goals.length && !activity ? '<div class="quiet-banner"><span class="online-dot"></span>The office is quiet. Give the Manager a goal to get started.</div>' : '';
-    return '<div class="office-view"><section class="office-stage">' + overview + '<div class="office-map-wrap"><div id="office-3d" class="office-3d" aria-label="Interactive 3D office"></div><div id="office-hover-card" class="office-hover-card hidden" role="tooltip"></div></div>' + renderTeamCard() + '<div class="scene-hint">Drag to orbit · Scroll to zoom</div><div class="office-tools"><button data-action="zoom-in" title="Zoom in">＋</button><button data-action="zoom-out" title="Zoom out">−</button><button data-action="rotate-map" title="Rotate the office">⟳</button><button data-action="fit-map" title="Fit the office to the screen">⛶</button><button data-action="team-toggle" title="Show every name">♧</button></div>' + sceneActions + activityBar + '<div class="office-options"><label><input type="checkbox" data-option="showNames" ' + (state.showNames ? "checked" : "") + '> Show every name</label><label><input type="checkbox" data-option="reduceMotion" ' + (state.reduceMotion ? "checked" : "") + '> Reduce motion</label></div>' + empty + '</section>' + renderManagerPanel() + '</div>';
+    const panelReopen = state.managerPanelOpen ? "" : '<button class="office-panel-reopen" type="button" data-action="toggle-manager-panel" aria-label="Open chat panel" title="Open chat panel">◧ <span>Open chat</span></button>';
+    const panel = state.managerPanelOpen ? renderManagerPanel() : "";
+    return '<div class="office-view' + (state.managerPanelOpen ? "" : " office-view--manager-collapsed") + '"><section class="office-stage">' + overview + '<div class="office-map-wrap"><div id="office-3d" class="office-3d" aria-label="Interactive 3D office"></div><div id="office-hover-card" class="office-hover-card hidden" role="tooltip"></div></div>' + renderTeamCard() + '<div class="scene-hint">Drag to orbit · Scroll to zoom</div><div class="office-tools"><button data-action="zoom-in" title="Zoom in">＋</button><button data-action="zoom-out" title="Zoom out">−</button><button data-action="rotate-map" title="Rotate the office">⟳</button><button data-action="fit-map" title="Fit the office to the screen">⛶</button><button data-action="team-toggle" title="Show every name">♧</button></div>' + sceneActions + activityBar + '<div class="office-options"><label><input type="checkbox" data-option="showNames" ' + (state.showNames ? "checked" : "") + '> Show every name</label><label><input type="checkbox" data-option="reduceMotion" ' + (state.reduceMotion ? "checked" : "") + '> Reduce motion</label></div>' + empty + panelReopen + '</section>' + panel + '</div>';
   }
 
   function renderManagerPage() {
@@ -1264,6 +1270,8 @@ import { createWorkspaceStore } from "./workspace-store.js";
       else if (name === "rotate-map") { state.mapRotate = (state.mapRotate + 45) % 360; render(); }
       else if (name === "fit-map") { state.mapScale = 1.1; state.mapRotate = 0; render(); }
       else if (name === "team-toggle") { state.showNames = !state.showNames; render(); }
+      else if (name === "toggle-team-list") { state.teamListOpen = !state.teamListOpen; render(); }
+      else if (name === "toggle-manager-panel") { state.managerPanelOpen = !state.managerPanelOpen; render(); }
       else if (name === "back-employees") navTo("employees");
       else if (name === "run-goal") { runGoal(action.dataset.goal); return; }
       else if (name === "view-task") { viewTask(action.dataset.task); return; }
