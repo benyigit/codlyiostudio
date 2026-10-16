@@ -15,7 +15,7 @@ LyngL'nin gözlemlenen Office çalışma mantığına dayanan, bağımsız bir �
 
 ## Çalışan profilleri ve adlandırma
 
-- Her çalışan için görünen ad düzenlenebilmeli. Örneğin Mert adı kullanıcı tarafından değiştirilebilmeli.
+- Her çalışan için görünen ad düzenlenebilmeli. Örneğin Ethan adı kullanıcı tarafından değiştirilebilmeli.
 - Görünen ad; çalışanın sabit kimliğinden, rolünden, departmanından, becerilerinden ve talimatlarından ayrı tutulmalı. Yeniden adlandırma görev geçmişini veya atamaları bozmamalı.
 - Çalışan profili rol, departman, beceriler, talimatlar, izinler, durum ve son görevleri göstermeli.
 
