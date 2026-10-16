@@ -86,6 +86,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
         meetings: Array.isArray(saved.meetings) ? saved.meetings : [],
         directMessages: saved.directMessages && typeof saved.directMessages === "object" ? saved.directMessages : {},
         settings: saved.settings || {},
+        workspaceProfile: saved.workspaceProfile && typeof saved.workspaceProfile === "object" ? saved.workspaceProfile : null,
         currentPage: "office",
         selectedEmployee: "",
         managerTab: "manager",
@@ -110,7 +111,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
       };
     } catch (error) {
       return {
-        employees: seedEmployees(), goals: [], tasks: [], workflows: [], activity: [], meetings: [], directMessages: {}, settings: {},
+        employees: seedEmployees(), goals: [], tasks: [], workflows: [], activity: [], meetings: [], directMessages: {}, settings: {}, workspaceProfile: null,
         currentPage: "office", selectedEmployee: "", managerTab: "manager", approvalTab: "Waiting",
         taskTab: "Goals", taskFilter: "All", settingsTab: "General", integrationCategory: "Popular",
         integrationSearch: "", calendarDate: new Date(), calendarMode: "Month", showNames: true,
@@ -124,6 +125,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
   const view = document.getElementById("view");
   const modalRoot = document.getElementById("modal-root");
   const authScreen = document.getElementById("auth-screen");
+  const workspaceOnboarding = document.getElementById("workspace-onboarding");
   let toastTimer = null;
   let ambientCoffeeTimer = null;
   let workspaceStore = null;
@@ -176,7 +178,8 @@ import { createWorkspaceStore } from "./workspace-store.js";
       activity: state.activity,
       meetings: state.meetings,
       directMessages: state.directMessages,
-      settings: state.settings
+      settings: state.settings,
+      workspaceProfile: state.workspaceProfile
     };
     return scrubSecrets(snapshot);
   }
@@ -231,7 +234,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
 
   function applySnapshot(snapshot) {
     const restored = loadSaved(snapshot);
-    ["employees", "goals", "tasks", "workflows", "activity", "meetings", "directMessages", "settings"].forEach(function (key) {
+    ["employees", "goals", "tasks", "workflows", "activity", "meetings", "directMessages", "settings", "workspaceProfile"].forEach(function (key) {
       state[key] = restored[key];
     });
   }
@@ -241,9 +244,26 @@ import { createWorkspaceStore } from "./workspace-store.js";
     authNotice = message || "";
     authNoticeIsError = Boolean(isError);
     const signup = authMode === "signup";
-    authScreen.innerHTML = '<section class="auth-card"><div class="brand auth-brand"><span class="brand-mark">C</span><span>Codly Office</span></div><p class="eyebrow">SHARED WORKSPACE</p><h1>' + (signup ? "Create your account" : "Welcome back") + '</h1><p class="auth-subtitle">' + (signup ? "Create an account to keep your team and workspace in sync across devices." : "Sign in to open your workspace on this device.") + '</p>' + (authNotice ? '<div class="auth-notice ' + (authNoticeIsError ? "error" : "") + '">' + esc(authNotice) + '</div>' : '') + '<form id="auth-form"><label class="auth-field"><span>Email</span><input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label><label class="auth-field"><span>Password</span><input name="password" type="password" autocomplete="' + (signup ? "new-password" : "current-password") + '" minlength="8" required placeholder="At least 8 characters"></label><button class="button primary auth-submit" type="submit">' + (signup ? "Create account" : "Sign in") + '</button></form><button class="auth-switch" type="button" data-auth-mode="' + (signup ? "signin" : "signup") + '">' + (signup ? "Already have an account? Sign in" : "New to Codly Office? Create an account") + '</button><p class="auth-footnote">Your model provider keys stay on the local runtime and are not included in workspace sync.</p></section>';
+    authScreen.innerHTML = '<section class="auth-card"><div class="brand auth-brand"><img class="brand-logo" src="/brand-mark.png" alt=""><span>Codlyio Studio</span></div><p class="eyebrow">YOUR AI WORKSPACE</p><h1>' + (signup ? "Create your account" : "Welcome back") + '</h1><p class="auth-subtitle">' + (signup ? "Create an account to keep your team and workspace in sync across devices." : "Sign in to open your workspace on this device.") + '</p>' + (authNotice ? '<div class="auth-notice ' + (authNoticeIsError ? "error" : "") + '">' + esc(authNotice) + '</div>' : '') + '<form id="auth-form"><label class="auth-field"><span>Email</span><input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label><label class="auth-field"><span>Password</span><input name="password" type="password" autocomplete="' + (signup ? "new-password" : "current-password") + '" minlength="8" required placeholder="At least 8 characters"></label><button class="button primary auth-submit" type="submit">' + (signup ? "Create account" : "Sign in") + '</button></form><button class="auth-switch" type="button" data-auth-mode="' + (signup ? "signin" : "signup") + '">' + (signup ? "Already have an account? Sign in" : "New to Codlyio Studio? Create an account") + '</button><p class="auth-footnote">Your model provider keys stay on the local runtime and are not included in workspace sync.</p></section>';
     authScreen.classList.remove("hidden");
+    if (workspaceOnboarding) workspaceOnboarding.classList.add("hidden");
     document.querySelector(".shell").classList.add("hidden");
+  }
+
+  function showWorkspaceOnboarding() {
+    if (!workspaceOnboarding) return;
+    const profile = state.workspaceProfile || {};
+    const type = profile.type || "Company";
+    const industry = profile.industry || "";
+    workspaceOnboarding.innerHTML = '<section class="onboarding-card"><div class="brand onboarding-brand"><img class="brand-logo" src="/brand-mark.png" alt=""><span>Codlyio Studio</span></div><p class="eyebrow">LET’S SET UP YOUR SPACE</p><h1>Tell us what you’re building</h1><p class="auth-subtitle">Add a few details about your company or personal workspace. This profile is saved to your account and can shape your Studio experience.</p><form id="workspace-profile-form"><label class="auth-field"><span>Workspace name</span><input name="name" maxlength="60" required value="' + esc(profile.name || state.settings.workspaceName || "") + '" placeholder="e.g. Acme Studio"></label><div class="onboarding-grid"><label class="auth-field"><span>Workspace type</span><select name="type"><option value="Company"' + (type === "Company" ? " selected" : "") + '>Company</option><option value="Personal"' + (type === "Personal" ? " selected" : "") + '>Personal workspace</option></select></label><label class="auth-field"><span>Industry</span><select name="industry"><option value="">Choose an industry</option><option' + (industry === "Technology" ? " selected" : "") + '>Technology</option><option' + (industry === "Creative" ? " selected" : "") + '>Creative & design</option><option' + (industry === "Marketing" ? " selected" : "") + '>Marketing</option><option' + (industry === "E-commerce" ? " selected" : "") + '>E-commerce</option><option' + (industry === "Education" ? " selected" : "") + '>Education</option><option' + (industry === "Other" ? " selected" : "") + '>Other</option></select></label></div><label class="auth-field"><span>What do you want to build?</span><textarea name="description" maxlength="280" rows="3" placeholder="Briefly describe your company, project, or goals…">' + esc(profile.description || "") + '</textarea></label><label class="auth-field"><span>Website <em>optional</em></span><input name="website" type="url" maxlength="200" value="' + esc(profile.website || "") + '" placeholder="https://example.com"></label><button class="button primary auth-submit" type="submit">Save workspace and continue</button></form><p class="auth-footnote">Your workspace profile is saved to your account and synced across your devices.</p></section>';
+    if (authScreen) authScreen.classList.add("hidden");
+    workspaceOnboarding.classList.remove("hidden");
+    document.querySelector(".shell").classList.add("hidden");
+  }
+
+  function hideWorkspaceOnboarding() {
+    if (workspaceOnboarding) workspaceOnboarding.classList.add("hidden");
+    document.querySelector(".shell").classList.remove("hidden");
   }
 
   function hideAuthScreen() {
@@ -296,6 +316,10 @@ import { createWorkspaceStore } from "./workspace-store.js";
       });
       cloudSyncStatus = "synced";
       authNotice = "";
+      if (!state.workspaceProfile || !state.workspaceProfile.name) {
+        showWorkspaceOnboarding();
+        return;
+      }
       hideAuthScreen();
       render();
     } catch (error) {
@@ -474,7 +498,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
   function renderOffice() {
     const working = state.employees.filter(function (person) { return ["Working", "Meeting", "Speaking"].includes(person.status); }).length;
     const activeGoals = state.goals.filter(function (goal) { return goal.status !== "Done"; }).length;
-    const overview = '<div class="office-summary"><h1>' + esc(state.settings.workspaceName || "Codlyio Studio") + '</h1><div class="summary-meta"><span class="online-dot"></span><span>' + working + ' of ' + state.employees.length + ' working</span><span class="separator">·</span><span>' + activeGoals + ' active goal' + (activeGoals === 1 ? "" : "s") + '</span><span class="separator">·</span><button class="credits-link" data-page="usage">Model routes</button></div></div>';
+    const overview = '<div class="office-summary"><h1>' + esc((state.workspaceProfile && state.workspaceProfile.name) || state.settings.workspaceName || "Codlyio Studio") + '</h1><div class="summary-meta"><span class="online-dot"></span><span>' + working + ' of ' + state.employees.length + ' working</span><span class="separator">·</span><span>' + activeGoals + ' active goal' + (activeGoals === 1 ? "" : "s") + '</span><span class="separator">·</span><button class="credits-link" data-page="usage">Model routes</button></div></div>';
     const activity = state.officeActivity;
     const activityName = activity ? activity.type === "meeting" ? "Team meeting" : "Coffee break" : "";
     const activityBar = activity ? '<div class="office-live-activity"><div><strong>' + activityName + '</strong><span>' + esc(activity.subject || activity.participantIds.map(function (id) { return employee(id)?.name || ""; }).join(", ")) + '</span></div><button class="button small" data-action="end-office-activity">End</button></div>' : '';
@@ -689,7 +713,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
     const tabs = SETTINGS_TABS.map(function (tab) { return '<button class="settings-tab ' + (state.settingsTab === tab ? "active" : "") + '" data-settings-tab="' + esc(tab) + '">' + esc(tab) + '</button>'; }).join("");
     let content = "";
     if (state.settingsTab === "General") {
-      content = '<h2>General</h2><div class="field"><label>Workspace name</label><input value="' + esc(state.settings.workspaceName || "Codlyio Studio") + '" data-workspace-name></div><div class="field"><label>Time zone</label><select data-time-zone><option>Europe/Istanbul</option><option>UTC</option><option>Europe/London</option><option>America/New York</option></select></div><button class="button" data-action="save-general">Save</button>' + settingRow("Model runtime", state.apiOnline ? "Local runtime" : "Runtime offline") + settingRow("Workspace sync", cloudUser ? cloudSyncStatus : "Local only") + (cloudUser ? settingRow("Account", esc(cloudUser.email || "Signed in")) : "") + settingRow("Your role", "Owner");
+      content = '<h2>General</h2><div class="field"><label>Workspace name</label><input value="' + esc((state.workspaceProfile && state.workspaceProfile.name) || state.settings.workspaceName || "Codlyio Studio") + '" data-workspace-name></div>' + (state.workspaceProfile ? '<div class="workspace-profile-summary"><strong>' + esc(state.workspaceProfile.type || "Workspace") + (state.workspaceProfile.industry ? ' · ' + esc(state.workspaceProfile.industry) : '') + '</strong><span>' + esc(state.workspaceProfile.description || "Workspace profile saved to your account.") + '</span></div>' : '') + '<div class="field"><label>Time zone</label><select data-time-zone><option>Europe/Istanbul</option><option>UTC</option><option>Europe/London</option><option>America/New York</option></select></div><button class="button" data-action="save-general">Save</button>' + settingRow("Model runtime", state.apiOnline ? "Local runtime" : "Runtime offline") + settingRow("Workspace sync", cloudUser ? cloudSyncStatus : "Local only") + (cloudUser ? settingRow("Account", esc(cloudUser.email || "Signed in")) : "") + settingRow("Your role", "Owner");
     } else if (state.settingsTab === "Language & market") {
       content = '<h2>Language & market</h2><div class="field"><label>Interface language</label><select data-interface-language><option>English</option><option>Türkçe</option></select><span class="field-help">The Manager’s replies can follow the interface language.</span></div><div class="field"><label>Default content language</label><input value="' + esc(state.settings.contentLanguage || "tr") + '" data-content-language></div><div class="field"><label>Default target market</label><input value="' + esc(state.settings.targetMarket || "TR") + '" data-target-market></div><button class="button" data-action="save-language">Save</button>';
     } else if (state.settingsTab === "Brand") {
@@ -741,7 +765,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
     const accountButton = document.getElementById("account-menu");
     if (workspaceSwitch) {
       const label = workspaceSwitch.firstChild;
-      if (label) label.textContent = (state.settings.workspaceName || "Codlyio Studio") + " ";
+      if (label) label.textContent = ((state.workspaceProfile && state.workspaceProfile.name) || state.settings.workspaceName || "Codlyio Studio") + " ";
     }
     if (accountButton) {
       accountButton.textContent = cloudUser && cloudUser.email ? cloudUser.email.slice(0, 1).toUpperCase() : "Y";
@@ -1265,7 +1289,10 @@ import { createWorkspaceStore } from "./workspace-store.js";
         if (workflow) { workflow.active = !workflow.active && !state.emergency; persist(); render(); }
       } else if (name === "save-general") {
         const nameInput = document.querySelector("[data-workspace-name]");
-        if (nameInput) state.settings.workspaceName = nameInput.value.trim();
+        if (nameInput) {
+          state.settings.workspaceName = nameInput.value.trim();
+          if (state.workspaceProfile) state.workspaceProfile.name = nameInput.value.trim();
+        }
         persist(); render(); toast(cloudUser ? "Workspace preferences saved; syncing." : "Workspace preferences saved locally.");
       } else if (name === "save-language") {
         const lang = document.querySelector("[data-content-language]");
@@ -1383,6 +1410,24 @@ import { createWorkspaceStore } from "./workspace-store.js";
       } catch (error) {
         showAuthScreen(error.message || "Giriş işlemi tamamlanamadı.", true);
       }
+    } else if (event.target.id === "workspace-profile-form") {
+      event.preventDefault();
+      const data = new FormData(event.target);
+      const name = String(data.get("name") || "").trim();
+      if (!name) return;
+      state.workspaceProfile = {
+        name: name,
+        type: String(data.get("type") || "Company"),
+        industry: String(data.get("industry") || ""),
+        description: String(data.get("description") || "").trim(),
+        website: String(data.get("website") || "").trim(),
+        createdAt: state.workspaceProfile && state.workspaceProfile.createdAt ? state.workspaceProfile.createdAt : new Date().toISOString()
+      };
+      state.settings.workspaceName = name;
+      persist();
+      hideWorkspaceOnboarding();
+      render();
+      toast("Workspace profile saved to your account.");
     } else if (event.target.id === "manager-form") {
       event.preventDefault();
       const input = document.getElementById("manager-input");

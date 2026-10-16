@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#111111" />
+    <meta name="theme-color" content="#f7f8fb" />
     <title>Codlyio Studio — Office</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <div class="shell">
       <aside class="sidebar">
-        <div class="brand"><span class="brand-mark">C</span><span>Codly Office</span></div>
+        <div class="brand"><img class="brand-logo" src="/brand-mark.png" alt=""><span>Codlyio Studio</span></div>
         <nav id="side-nav" aria-label="Ana menü">
           <button class="nav-item active" data-page="office"><span class="nav-icon">⌂</span>Office</button>
           <button class="nav-item" data-page="manager"><span class="nav-icon">◌</span>Manager</button>
@@ -59,6 +59,7 @@
 
     <div id="modal-root"></div>
     <div id="auth-screen" class="auth-screen hidden"></div>
+    <div id="workspace-onboarding" class="auth-screen hidden"></div>
     <script src="/node_modules/@supabase/supabase-js/dist/umd/supabase.js"></script>
     <script type="module" src="/app.js"></script>
   </body>

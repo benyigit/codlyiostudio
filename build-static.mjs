@@ -12,6 +12,7 @@ const staticFiles = [
   "workspace-store.js",
   "styles.css",
   "landing.css",
+  "brand-mark.png",
   "favicon.svg"
 ];
 
