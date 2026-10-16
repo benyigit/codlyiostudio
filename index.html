@@ -34,7 +34,7 @@
 
       <div class="header-actions">
         <a class="header-login" href="https://studio.codlyio.com">Giriş yap</a>
-        <button class="theme-toggle" data-theme-toggle type="button" aria-label="Koyu temaya geç" title="Koyu temaya geç"><span aria-hidden="true">☾</span><span data-theme-label>Koyu tema</span></button>
+        <button class="theme-toggle" data-theme-toggle type="button" aria-label="Koyu temaya geç" title="Koyu temaya geç"><span data-theme-icon aria-hidden="true">☾</span><span data-theme-label>Koyu tema</span></button>
         <a class="button button-small" href="https://studio.codlyio.com">Studio’yu aç <span aria-hidden="true">↗</span></a>
       </div>
 
@@ -277,32 +277,42 @@
     </main>
 
     <footer class="site-footer page-width">
-      <a class="brand" href="/" aria-label="Codlyio Studio ana sayfa"><img class="brand-mark" src="/brand-mark.png?v=2" alt=""><span class="brand-name">codlyio<span>studio</span></span></a>
-      <p>İnsanların yön verdiği, yapay zekânın birlikte ürettiği çalışma alanı.</p>
-      <span class="footer-copy">© 2026 Codlyio Studio</span>
+      <div class="footer-grid">
+        <section class="footer-brand" aria-label="Codlyio Studio">
+          <a class="brand" href="/" aria-label="Codlyio Studio ana sayfa"><img class="brand-mark" src="/brand-mark.png?v=2" alt=""><span class="brand-name">codlyio<span>studio</span></span></a>
+          <p class="footer-description">İnsanların yön verdiği, yapay zekânın birlikte ürettiği çalışma alanı.</p>
+          <a class="footer-contact-link" href="mailto:info@codly.io">Bize ulaşın <span aria-hidden="true">↗</span></a>
+        </section>
+
+        <nav class="footer-column" aria-label="Studio bağlantıları">
+          <h2>Studio</h2>
+          <a href="#studio">Çalışma alanı</a>
+          <a href="#how-it-works">Nasıl çalışır?</a>
+          <a href="#models">Modeller</a>
+          <a href="https://studio.codlyio.com">Giriş yap <span aria-hidden="true">↗</span></a>
+        </nav>
+
+        <nav class="footer-column" aria-label="Yasal bilgiler">
+          <h2>Yasal</h2>
+          <a href="/privacy">Gizlilik Politikası</a>
+          <a href="/terms">Kullanım Koşulları</a>
+          <a href="/cookies">Çerez Politikası</a>
+        </nav>
+
+        <section class="footer-column footer-contact">
+          <h2>İletişim</h2>
+          <a href="mailto:info@codly.io">info@codly.io</a>
+          <a class="footer-social-link" href="https://github.com/codlyio" target="_blank" rel="noopener noreferrer" aria-label="Codlyio GitHub">GitHub <span aria-hidden="true">↗</span></a>
+          <button class="footer-theme-toggle" data-footer-theme-toggle type="button" aria-label="Koyu temaya geç" title="Koyu temaya geç"><span data-theme-icon aria-hidden="true">☾</span><span data-theme-label>Koyu tema</span></button>
+        </section>
+      </div>
+      <div class="footer-watermark" aria-hidden="true">codlyio</div>
+      <div class="footer-bottom">
+        <span class="footer-copy">© 2026 Codlyio Studio. Tüm hakları saklıdır.</span>
+        <span class="footer-location">İstanbul, Türkiye</span>
+        <button class="footer-back-top" data-back-to-top type="button">Başa dön <span aria-hidden="true">↑</span></button>
+      </div>
     </footer>
-    <script>
-      const studioThemeButton = document.querySelector("[data-theme-toggle]");
-      const updateStudioThemeButton = () => {
-        const light = document.documentElement.classList.contains("light-theme");
-        const label = light ? "Koyu tema" : "Açık tema";
-        const action = light ? "Koyu temaya geç" : "Açık temaya geç";
-        studioThemeButton.setAttribute("aria-label", action);
-        studioThemeButton.title = action;
-        studioThemeButton.querySelector("[data-theme-label]").textContent = label;
-        studioThemeButton.querySelector("[aria-hidden]").textContent = light ? "☾" : "☀";
-      };
-      updateStudioThemeButton();
-      studioThemeButton.addEventListener("click", () => {
-        const light = document.documentElement.classList.toggle("light-theme");
-        localStorage.setItem("codly-studio-theme", light ? "light" : "dark");
-        updateStudioThemeButton();
-      });
-      if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-        document.querySelectorAll('a[href="https://studio.codlyio.com"]').forEach((link) => {
-          link.href = "/office";
-        });
-      }
-    </script>
+    <script src="/theme.js" defer></script>
   </body>
 </html>

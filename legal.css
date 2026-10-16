@@ -1,0 +1,32 @@
+.legal-main {
+  width: min(820px, calc(100% - 48px));
+  min-height: 67vh;
+  padding-top: 48px;
+  padding-bottom: 100px;
+}
+.legal-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 60px; color: var(--muted); font-size: 11px; }
+.legal-back:hover { color: var(--text); }
+.legal-eyebrow { margin: 0 0 15px; color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .14em; }
+.legal-main h1 { max-width: 720px; margin: 0; color: var(--text); font: 700 clamp(38px, 6vw, 66px)/1.05 Manrope, sans-serif; letter-spacing: -.065em; }
+.legal-intro { max-width: 690px; margin: 20px 0 0; color: var(--muted); font-size: 14px; line-height: 1.85; }
+.legal-updated { margin: 20px 0 0; color: var(--quiet); font-size: 10px; }
+.legal-section { display: grid; grid-template-columns: 40px minmax(0,1fr); gap: 16px; padding: 27px 0; border-top: 1px solid var(--line); }
+.legal-section:first-of-type { margin-top: 35px; }
+.legal-number { padding-top: 4px; color: var(--quiet); font: 700 10px 'DM Sans', sans-serif; letter-spacing: .1em; }
+.legal-section h2 { margin: 0 0 12px; color: var(--text); font-size: 14px; font-weight: 700; letter-spacing: -.3px; }
+.legal-section p { margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.9; }
+.legal-contact { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 25px; padding: 17px 19px; border: 1px solid var(--line); border-radius: 11px; color: var(--muted); font-size: 11px; }
+.legal-contact a { color: var(--text); font-weight: 700; }
+.legal-footer { display: flex; min-height: 82px; align-items: center; justify-content: space-between; gap: 18px; border-top: 1px solid var(--line); color: var(--quiet); font-size: 9px; }
+.legal-footer nav { display: flex; flex-wrap: wrap; gap: 14px; }
+.legal-footer nav a { color: var(--muted); }
+.legal-footer nav a:hover { color: var(--text); }
+.legal-footer .brand-mark { width: 28px; height: 28px; }
+.legal-footer .brand-name { font-size: 13px; }
+@media (max-width: 620px) {
+  .legal-main { width: calc(100% - 36px); padding-top: 32px; padding-bottom: 74px; }
+  .legal-back { margin-bottom: 42px; }
+  .legal-section { grid-template-columns: 27px minmax(0,1fr); gap: 9px; padding: 22px 0; }
+  .legal-contact { align-items: flex-start; flex-direction: column; }
+  .legal-footer { width: calc(100% - 36px); padding: 16px 0; align-items: flex-start; flex-direction: column; }
+}

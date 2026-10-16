@@ -12,6 +12,12 @@ const staticFiles = [
   "workspace-store.js",
   "styles.css",
   "landing.css",
+  "legal.css",
+  "legal.js",
+  "theme.js",
+  "privacy.html",
+  "terms.html",
+  "cookies.html",
   "brand-mark.png",
   "favicon.svg"
 ];

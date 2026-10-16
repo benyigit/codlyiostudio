@@ -211,6 +211,8 @@ async function serveStatic(pathname, response) {
     ? "/index.html"
     : pathname === "/office" || pathname === "/office/"
       ? "/office.html"
+      : ["/privacy", "/privacy/", "/terms", "/terms/", "/cookies", "/cookies/"].includes(pathname)
+        ? `/${pathname.split("/").filter(Boolean)[0]}.html`
       : decodeURIComponent(pathname);
   const filePath = resolve(ROOT, `.${requested}`);
   if (filePath !== ROOT && !filePath.startsWith(ROOT + sep)) {
