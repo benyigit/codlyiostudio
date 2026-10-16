@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111111" />
+    <title>Codlyio Studio — Office</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand"><span class="brand-mark">C</span><span>Codly Office</span></div>
+        <nav id="side-nav" aria-label="Ana menü">
+          <button class="nav-item active" data-page="office"><span class="nav-icon">⌂</span>Office</button>
+          <button class="nav-item" data-page="manager"><span class="nav-icon">◌</span>Manager</button>
+
+          <div class="nav-label">WORK</div>
+          <button class="nav-item" data-page="tasks"><span class="nav-icon">☷</span>Tasks</button>
+          <button class="nav-item" data-page="projects"><span class="nav-icon">▣</span>Projects</button>
+          <button class="nav-item" data-page="development"><span class="nav-icon">⌘</span>Development</button>
+          <button class="nav-item" data-page="artifacts"><span class="nav-icon">▧</span>Artifacts</button>
+          <button class="nav-item" data-page="approvals"><span class="nav-icon">◇</span>Approvals <span id="approval-count" class="nav-count hidden">0</span></button>
+          <button class="nav-item" data-page="activity"><span class="nav-icon">⌁</span>Activity</button>
+
+          <div class="nav-label">GROWTH</div>
+          <button class="nav-item" data-page="content"><span class="nav-icon">▤</span>Content</button>
+          <button class="nav-item" data-page="calendar"><span class="nav-icon">▦</span>Calendar</button>
+          <button class="nav-item" data-page="campaigns"><span class="nav-icon">↗</span>Campaigns</button>
+          <button class="nav-item" data-page="analytics"><span class="nav-icon">⌁</span>Analytics</button>
+
+          <div class="nav-label">TEAM</div>
+          <button class="nav-item" data-page="employees"><span class="nav-icon">♙</span>Employees</button>
+          <button class="nav-item" data-page="departments"><span class="nav-icon">⌘</span>Departments</button>
+
+          <div class="nav-label">AUTOMATION</div>
+          <button class="nav-item" data-page="workflows"><span class="nav-icon">⟳</span>Workflows</button>
+
+          <div class="nav-label">WORKSPACE</div>
+          <button class="nav-item" data-page="integrations"><span class="nav-icon">⊞</span>Integrations</button>
+          <button class="nav-item" data-page="usage"><span class="nav-icon">◴</span>Usage</button>
+          <button class="nav-item" data-page="settings"><span class="nav-icon">☷</span>Settings</button>
+        </nav>
+        <div class="sidebar-foot"><span class="online-dot" id="runtime-dot"></span><span id="runtime-mode">Connecting to local runtime…</span></div>
+      </aside>
+
+      <header class="topbar">
+        <button class="workspace-switch" id="workspace-switch">Codlyio Studio <span>⌄</span></button>
+        <div class="topbar-actions">
+          <span class="live-pill" id="runtime-indicator"><span class="online-dot" id="runtime-pill-dot"></span> Connecting…</span>
+          <button class="icon-button" id="notifications-button" aria-label="Notifications">♧<span class="notification-dot"></span></button>
+          <button class="stop-button" id="stop-all">⊗ <span>Stop all</span></button>
+          <button class="user-avatar" id="account-menu" aria-label="Account">Y</button>
+        </div>
+      </header>
+
+      <main id="view" class="view" tabindex="-1"></main>
+    </div>
+
+    <div id="modal-root"></div>
+    <div id="auth-screen" class="auth-screen hidden"></div>
+    <script src="/node_modules/@supabase/supabase-js/dist/umd/supabase.js"></script>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
