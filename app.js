@@ -18,22 +18,27 @@ import { createWorkspaceStore } from "./workspace-store.js";
     "Custom endpoint": ""
   };
   const SEED_EMPLOYEES = [
-    ["Manager", "Chief AI Manager", "Executive", "Reasoning", "Planning · Delegation · Coordination"],
-    ["Atlas", "Research Analyst", "Research", "Balanced", "Market research · Web research · Source analysis"],
-    ["Aria", "Product Manager", "Product", "Balanced", "Product strategy · Requirements · Roadmaps"],
-    ["Nova", "Creative Director", "Design", "Creative", "Art direction · Brand design · Visual systems"],
-    ["Codey", "Full-stack Engineer", "Software Development", "Reasoning", "Frontend · Backend · APIs · Debugging"],
-    ["Forge", "DevOps Engineer", "Software Development", "Pro", "Infrastructure · CI/CD · Deployment"],
-    ["Quinn", "QA Engineer", "Software Development", "Pro", "Testing · Quality assurance · Accessibility"],
-    ["Mira", "Growth Strategist", "Growth & Marketing", "Balanced", "Growth strategy · Social campaigns · Audience"],
-    ["Echo", "Content Manager", "Content", "Balanced", "Editorial · Copywriting · Content planning"],
-    ["Lumi", "Video Director", "Content", "Pro", "Video · Storyboards · Short-form content"],
-    ["Pixel", "Media Producer", "Design", "Balanced", "Image production · Layout · Brand consistency"],
-    ["Max", "Ads Manager", "Advertising", "Balanced", "Paid social · Campaigns · Budget monitoring"],
-    ["Iris", "Data Analyst", "Data & Analytics", "Reasoning", "Analytics · Metrics · Reporting"],
-    ["Sage", "Support Specialist", "Customer Support", "Pro", "Customer support · Triage · Knowledge base"],
-    ["Otto", "Operations Coordinator", "Operations", "Pro", "Operations · Scheduling · Process design"]
+    ["Deniz", "Chief AI Manager", "Executive", "Reasoning", "Planning · Delegation · Coordination"],
+    ["Bora", "Research Analyst", "Research", "Balanced", "Market research · Web research · Source analysis"],
+    ["Ece", "Product Manager", "Product", "Balanced", "Product strategy · Requirements · Roadmaps"],
+    ["Selin", "Creative Director", "Design", "Creative", "Art direction · Brand design · Visual systems"],
+    ["Mert", "Full-stack Engineer", "Software Development", "Reasoning", "Frontend · Backend · APIs · Debugging"],
+    ["Emre", "DevOps Engineer", "Software Development", "Pro", "Infrastructure · CI/CD · Deployment"],
+    ["Ayşe", "QA Engineer", "Software Development", "Pro", "Testing · Quality assurance · Accessibility"],
+    ["Duru", "Growth Strategist", "Growth & Marketing", "Balanced", "Growth strategy · Social campaigns · Audience"],
+    ["Cem", "Content Manager", "Content", "Balanced", "Editorial · Copywriting · Content planning"],
+    ["İrem", "Video Director", "Content", "Pro", "Video · Storyboards · Short-form content"],
+    ["Can", "Media Producer", "Design", "Balanced", "Image production · Layout · Brand consistency"],
+    ["Elif", "Ads Manager", "Advertising", "Balanced", "Paid social · Campaigns · Budget monitoring"],
+    ["Barış", "Data Analyst", "Data & Analytics", "Reasoning", "Analytics · Metrics · Reporting"],
+    ["Aslı", "Support Specialist", "Customer Support", "Pro", "Customer support · Triage · Knowledge base"],
+    ["Onur", "Operations Coordinator", "Operations", "Pro", "Operations · Scheduling · Process design"]
   ];
+  const LEGACY_EMPLOYEE_NAMES = {
+    Manager: "Deniz", Atlas: "Bora", Aria: "Ece", Nova: "Selin", Codey: "Mert",
+    Forge: "Emre", Quinn: "Ayşe", Mira: "Duru", Echo: "Cem", Lumi: "İrem",
+    Pixel: "Can", Max: "Elif", Iris: "Barış", Sage: "Aslı", Otto: "Onur"
+  };
   function seedEmployees() {
     return SEED_EMPLOYEES.map(function (item, index) {
       return {
@@ -58,7 +63,11 @@ import { createWorkspaceStore } from "./workspace-store.js";
       const saved = snapshotOverride === undefined ? JSON.parse(localStorage.getItem(STORE) || "{}") : (snapshotOverride || {});
       const employees = seedEmployees().map(function (person) {
         const match = (saved.employees || []).find(function (item) { return item.id === person.id; });
-        if (match) Object.assign(person, match);
+        if (match) {
+          const savedPerson = Object.assign({}, match);
+          if (LEGACY_EMPLOYEE_NAMES[savedPerson.name]) savedPerson.name = LEGACY_EMPLOYEE_NAMES[savedPerson.name];
+          Object.assign(person, savedPerson);
+        }
         person.status = "Idle";
         return person;
       });
@@ -250,9 +259,11 @@ import { createWorkspaceStore } from "./workspace-store.js";
     cloudConflictNotified = false;
     cloudRestoreInProgress = true;
     cloudSyncStatus = "syncing";
+    let migratedEmployeeNames = false;
     try {
       const snapshot = await workspaceStore.loadSnapshot();
       if (snapshot) {
+        migratedEmployeeNames = (snapshot.data.employees || []).some(function (person) { return Boolean(LEGACY_EMPLOYEE_NAMES[person.name]); });
         applySnapshot(snapshot.data);
         cloudRevision = snapshot.revision;
         saveLocalSnapshot(persistedSnapshot());
@@ -288,6 +299,9 @@ import { createWorkspaceStore } from "./workspace-store.js";
     } finally {
       cloudRestoreInProgress = false;
       activatingUserId = "";
+      if (migratedEmployeeNames && cloudUser && cloudUser.id === user.id && cloudSyncStatus === "synced") {
+        queueCloudSave(persistedSnapshot());
+      }
     }
   }
 
