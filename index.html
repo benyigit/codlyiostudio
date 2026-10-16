@@ -26,8 +26,8 @@
       </nav>
 
       <div class="header-actions">
-        <a class="header-login" href="/office">Giriş yap</a>
-        <a class="button button-small" href="/office">Studio’yu aç <span aria-hidden="true">↗</span></a>
+        <a class="header-login" href="https://studio.codlyio.com">Giriş yap</a>
+        <a class="button button-small" href="https://studio.codlyio.com">Studio’yu aç <span aria-hidden="true">↗</span></a>
       </div>
 
       <details class="mobile-menu">
@@ -36,7 +36,7 @@
           <a href="#studio">Studio</a>
           <a href="#how-it-works">Nasıl çalışır?</a>
           <a href="#models">Modeller</a>
-          <a href="/office">Studio’yu aç ↗</a>
+          <a href="https://studio.codlyio.com">Studio’yu aç ↗</a>
         </nav>
       </details>
     </header>
@@ -54,7 +54,7 @@
           <p class="hero-description">Modellerini uzman rollere bağla, işleri tek merkezden yönet. Codlyio Studio’da ekibin çalışmasını canlı bir ofiste gör.</p>
 
           <div class="hero-actions">
-            <a class="button button-primary" href="/office">Codlyio Studio’yu aç <span aria-hidden="true">↗</span></a>
+            <a class="button button-primary" href="https://studio.codlyio.com">Codlyio Studio’yu aç <span aria-hidden="true">↗</span></a>
             <a class="button button-quiet" href="#how-it-works"><span class="play-icon" aria-hidden="true">▷</span> Nasıl çalıştığını gör</a>
           </div>
 
@@ -243,7 +243,7 @@
           <p class="eyebrow"><span></span> SENİN MODELLERİN</p>
           <h2>İyi modeller.<br /><span>Doğru roller.</span></h2>
           <p>Her dijital çalışana uygun modeli seç. Bulut sağlayıcılarını, OpenAI uyumlu servisleri veya kendi bilgisayarındaki yerel modelleri kullan.</p>
-          <a class="text-link" href="/office">Model rotalarını keşfet <span aria-hidden="true">→</span></a>
+          <a class="text-link" href="https://studio.codlyio.com">Model rotalarını keşfet <span aria-hidden="true">→</span></a>
         </div>
         <div class="model-panel">
           <div class="model-panel-head"><span>BAĞLANABİLEN MODEL SERVİSLERİ</span><span class="model-panel-dot"></span></div>
@@ -264,7 +264,7 @@
         <p class="eyebrow"><span></span> DAHA ÇOK İŞ. DAHA AZ KOORDİNASYON.</p>
         <h2>Ekibin hazır.<br /><span>İlk hedefin ne?</span></h2>
         <p>Codlyio Studio’yu aç, dijital ekibini kendi çalışma alanında kur.</p>
-        <a class="button button-primary" href="/office">Studio’yu aç <span aria-hidden="true">↗</span></a>
+        <a class="button button-primary" href="https://studio.codlyio.com">Studio’yu aç <span aria-hidden="true">↗</span></a>
       </section>
     </main>
 
@@ -273,5 +273,12 @@
       <p>İnsanların yön verdiği, yapay zekânın birlikte ürettiği çalışma alanı.</p>
       <span class="footer-copy">© 2026 Codlyio Studio</span>
     </footer>
+    <script>
+      if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+        document.querySelectorAll('a[href="https://studio.codlyio.com"]').forEach((link) => {
+          link.href = "/office";
+        });
+      }
+    </script>
   </body>
 </html>

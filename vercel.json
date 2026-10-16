@@ -3,5 +3,13 @@
   "framework": null,
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "cleanUrls": true
+  "cleanUrls": true,
+  "routes": [
+    {
+      "src": "^/$",
+      "has": [{ "type": "host", "value": "studio.codlyio.com" }],
+      "dest": "/office"
+    },
+    { "handle": "filesystem" }
+  ]
 }
