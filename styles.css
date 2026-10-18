@@ -33,8 +33,9 @@ button { color: inherit; }
 .nav-item { position: relative; display: flex; align-items: center; width: 100%; height: 33px; padding: 0 10px; gap: 11px; border: 0; border-radius: 8px; background: transparent; color: #b3b2ae; text-align: left; font-size: 12.5px; cursor: pointer; transition: background .16s ease, color .16s ease; }
 .nav-item:hover { background: #1a1a1a; color: var(--text); }
 .nav-item.active { background: #242424; color: #fff; }
-.nav-icon { width: 15px; color: #92918c; text-align: center; font-size: 16px; line-height: 1; }
-.nav-item.active .nav-icon { color: #d0c9ff; }
+.nav-icon { display: grid; place-items: center; width: 16px; height: 16px; flex: 0 0 16px; color: #92918c; }
+.nav-icon svg { display: block; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.nav-item.active .nav-icon { color: inherit; }
 .nav-count { margin-left: auto; padding: 2px 6px; border-radius: 99px; background: #59474a; color: #f5d1ca; font-size: 10px; }
 .hidden { display: none !important; }
 .sidebar-foot { display: flex; align-items: center; gap: 7px; margin: auto 9px 3px; padding-top: 14px; color: #797873; font-size: 10px; }
@@ -321,7 +322,7 @@ tr[data-employee]:hover td { background: #1a1a1a; }
   .brand { justify-content: center; margin: 1px 0 17px; }
   .brand > span:last-child, .nav-label, .nav-item:not(.active)::after, .nav-item { font-size: 0; }
   .nav-item { justify-content: center; height: 38px; padding: 0; }
-  .nav-icon { width: auto; font-size: 17px; }
+  .nav-icon { width: 16px; height: 16px; }
   .sidebar-foot { justify-content: center; font-size: 0; }
   .office-view { grid-template-columns: 1fr; overflow: auto; }
   .office-stage { min-height: 610px; border-right: 0; border-bottom: 1px solid #2a2a2a; }
@@ -395,7 +396,7 @@ tr[data-employee]:hover td { background: #1a1a1a; }
 .nav-item:hover, tr[data-employee]:hover td { background: #f3f5f9; }
 .nav-item.active { background: #eeeaff; color: #4b3eb5; }
 .nav-icon { color: #778195; }
-.nav-item.active .nav-icon { color: #6959d2; }
+.nav-item.active .nav-icon { color: inherit; }
 .topbar, .tabs, .panel-tabs, .manager-composer { border-color: var(--line); }
 .workspace-switch, .page h1, .manager-intro, .card h3, .settings-content h2,
 .modal-head h2, .metric-value, .integration-card h3, .workflow-row strong,
