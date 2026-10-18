@@ -34,6 +34,8 @@ Model isteklerini çalıştıran `/api/chat` ve model rotalarını yöneten runt
 
 - Three.js tabanlı 3D Office, çalışanların masa/kafe/toplantı alanlarına hareketi ve gerçek görev durumları
 - Manager modelinden JSON iş planı alma ve çalışanlara atama
+- Workspace onboarding profili, marka beyni, hedef pazar ve dil tercihlerini planlama, görev, DM ve toplantı model çağrılarına bağlama
+- Kaydedilen workspace saat dilimini takvimde gösterme ve workflow formunun varsayılanı olarak kullanma
 - Her çalışan için OpenAI uyumlu API, Anthropic, Google Gemini, OpenRouter, Ollama, LM Studio veya özel endpoint rotası
 - Çalışan görünen adını değiştirme; görev atamaları sabit çalışan kimliğini korur
 - Sıralı metin görevleri yürütme, sonuçları görme ve Manager'dan son rapor alma
