@@ -144,7 +144,7 @@
     ["GITHUB", "GITHUB"], ["CODE SANDBOX", "KOD KUM HAVUZU"], ["DEPLOYMENTS", "DAĞITIMLAR"], ["TEST RUNS", "TEST ÇALIŞTIRMALARI"], ["REPOSITORIES", "DEPOLAR"],
     ["e.g. Acme Studio", "ör. Acme Studio"], ["Briefly describe your company, project, or goals…", "Şirketini, projen veya hedeflerini kısaca açıkla…"],
     ["Describe the outcome you want…", "İstediğin sonucu açıkla…"], ["Describe the outcome you want", "İstediğin sonucu açıkla"], ["Send", "Gönder"],
-    ["Interactive 3D office", "Etkileşimli 3D ofis"], ["Zoom in", "Yakınlaştır"], ["Zoom out", "Uzaklaştır"], ["Rotate the office", "Ofisi döndür"], ["Fit the office to the screen", "Ofisi ekrana sığdır"],
+    ["Interactive 3D office", "Etkileşimli 3D ofis"], ["Interactive office plan", "Etkileşimli ofis planı"], ["TEAM WORKSPACES", "EKİP ÇALIŞMA ALANLARI"], ["2D BACKUP VIEW", "2D YEDEK GÖRÜNÜM"], ["3D is unavailable in this browser. Your workspace is still ready.", "3D bu tarayıcıda kullanılamıyor; çalışma alanın yine de hazır."], ["No teammates yet", "Henüz ekip üyesi yok"], ["Interactive employee map · 2D mode", "Etkileşimli çalışan haritası · 2D görünüm"], ["Zoom in", "Yakınlaştır"], ["Zoom out", "Uzaklaştır"], ["Rotate the office", "Ofisi döndür"], ["Fit the office to the screen", "Ofisi ekrana sığdır"],
     ["Close chat panel", "Sohbet panelini kapat"], ["Open chat panel", "Sohbet panelini aç"], ["Open chat", "Sohbeti aç"],
     ["Collapse team list", "Ekip listesini daralt"], ["Expand team list", "Ekip listesini genişlet"],
     ["Token stays in this tab", "Token bu sekmede kalır"], ["Send message", "Mesaj gönder"], ["Add instructions for this employee…", "Bu çalışan için talimat ekle…"], ["Enter a model ID", "Model kimliği gir"],

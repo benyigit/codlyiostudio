@@ -1144,3 +1144,101 @@ export function mountOffice3D(container, employees, options = {}, onSelect, onHo
   state.renderer.setAnimationLoop(animate);
   return state.renderer.domElement;
 }
+
+export function mountOfficeFallback(container, employees, options = {}, onSelect) {
+  const fallback = document.createElement("div");
+  fallback.className = "office-fallback";
+  fallback.setAttribute("role", "group");
+  fallback.setAttribute("aria-label", "Interactive office plan");
+  fallback.style.setProperty("--fallback-scale", String(Math.max(0.82, Math.min(1.35, (Number(options.mapScale) || 1.1) / 1.1))));
+
+  const layout = document.createElement("div");
+  layout.className = "office-fallback-layout";
+
+  const header = document.createElement("div");
+  header.className = "office-fallback-header";
+  const headingGroup = document.createElement("div");
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "office-fallback-eyebrow";
+  eyebrow.textContent = "TEAM WORKSPACES";
+  const heading = document.createElement("h2");
+  heading.className = "office-fallback-title";
+  heading.textContent = "Interactive office plan";
+  headingGroup.append(eyebrow, heading);
+  const badge = document.createElement("span");
+  badge.className = "office-fallback-badge";
+  badge.textContent = "2D BACKUP VIEW";
+  header.append(headingGroup, badge);
+
+  const notice = document.createElement("p");
+  notice.className = "office-fallback-notice";
+  notice.textContent = "3D is unavailable in this browser. Your workspace is still ready.";
+
+  const grid = document.createElement("div");
+  grid.className = "office-fallback-grid";
+
+  const peopleByDepartment = new Map(DEPARTMENTS.map((department) => [department, []]));
+  employees.forEach((person) => {
+    const department = peopleByDepartment.has(person.department) ? person.department : "Executive";
+    peopleByDepartment.get(department).push(person);
+  });
+
+  DEPARTMENTS.forEach((department, index) => {
+    const people = peopleByDepartment.get(department);
+    const room = document.createElement("article");
+    room.className = "office-fallback-room";
+    room.style.setProperty("--department-color", DEPARTMENT_COLORS[index]);
+
+    const roomHeading = document.createElement("div");
+    roomHeading.className = "office-fallback-room-heading";
+    const departmentName = document.createElement("h3");
+    departmentName.textContent = department;
+    const count = document.createElement("span");
+    count.className = "office-fallback-count";
+    count.textContent = people.length + " EMPLOYEE" + (people.length === 1 ? "" : "S");
+    roomHeading.append(departmentName, count);
+
+    const workstations = document.createElement("div");
+    workstations.className = "office-fallback-workstations";
+    people.forEach((person) => {
+      const showName = options.showNames !== false;
+      const teammate = document.createElement("button");
+      teammate.className = "office-fallback-person" + (showName ? "" : " compact") + (person.id === options.selectedEmployee ? " selected" : "");
+      teammate.type = "button";
+      teammate.title = person.role || person.name;
+      teammate.setAttribute("aria-label", person.name + ", " + (person.role || department));
+      const dot = document.createElement("span");
+      dot.className = "office-fallback-person-dot";
+      const initials = document.createElement("span");
+      initials.className = "office-fallback-person-initials";
+      initials.textContent = String(person.name || "?").trim().split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toUpperCase();
+      teammate.appendChild(initials);
+      if (showName) teammate.appendChild(dot);
+      const name = document.createElement("span");
+      name.className = "office-fallback-person-name";
+      name.textContent = person.name;
+      if (showName) teammate.appendChild(name);
+      teammate.addEventListener("click", () => onSelect?.(person.id));
+      workstations.appendChild(teammate);
+    });
+
+    if (!people.length) {
+      const empty = document.createElement("span");
+      empty.className = "office-fallback-empty";
+      empty.textContent = "No teammates yet";
+      workstations.appendChild(empty);
+    }
+
+    room.append(roomHeading, workstations);
+    grid.appendChild(room);
+  });
+
+  layout.append(header, notice, grid);
+  fallback.appendChild(layout);
+  container.replaceChildren(fallback);
+  container.classList.add("office-3d-fallback");
+
+  const rotateButton = container.closest(".office-stage")?.querySelector('[data-action="rotate-map"]');
+  if (rotateButton) rotateButton.classList.add("hidden");
+  return fallback;
+}

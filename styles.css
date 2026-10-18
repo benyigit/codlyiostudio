@@ -92,6 +92,29 @@ button { color: inherit; }
 .office-3d { position: absolute; inset: 0; overflow: hidden; border-radius: 8px; }
 .office-3d-canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; outline: 0; }
 .office-3d-canvas.dragging { cursor: grabbing; }
+.office-3d-fallback { overflow: auto; background: radial-gradient(ellipse at 50% 40%, #202020 0, #171717 66%); scrollbar-width: thin; scrollbar-color: #414141 transparent; }
+.office-fallback { display: grid; min-height: 100%; place-items: center; padding: 24px; }
+.office-fallback-layout { display: grid; width: min(100%, 980px); gap: 12px; margin: auto; }
+.office-fallback-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.office-fallback-eyebrow { margin-bottom: 5px; color: #8e8e8e; font-size: 8px; font-weight: 700; letter-spacing: .15em; }
+.office-fallback-title { margin: 0; color: #f0f0f0; font: 22px/1.15 var(--serif); letter-spacing: -.04em; }
+.office-fallback-badge { flex: 0 0 auto; padding: 6px 8px; border: 1px solid #393939; border-radius: 99px; color: #b2b2b2; font-size: 8px; font-weight: 650; letter-spacing: .08em; }
+.office-fallback-notice { margin: 0; color: #929292; font-size: 10px; line-height: 1.4; }
+.office-fallback-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; transform: scale(var(--fallback-scale, 1)); transform-origin: center; transition: transform .18s ease; }
+.office-fallback-room { position: relative; display: flex; min-width: 0; min-height: 103px; flex-direction: column; gap: 12px; overflow: hidden; padding: 11px; border: 1px solid color-mix(in srgb, var(--department-color) 30%, #353535); border-radius: 12px; background: linear-gradient(145deg, color-mix(in srgb, var(--department-color) 9%, #1c1c1c), #191919 68%); }
+.office-fallback-room::before { position: absolute; top: 0; right: 12px; left: 12px; height: 2px; border-radius: 0 0 3px 3px; background: color-mix(in srgb, var(--department-color) 70%, #777); content: ""; opacity: .8; }
+.office-fallback-room-heading { display: grid; gap: 4px; }
+.office-fallback-room-heading h3 { overflow: hidden; margin: 0; color: #e4e4e4; font-size: 11px; font-weight: 550; text-overflow: ellipsis; white-space: nowrap; }
+.office-fallback-count { color: #858585; font-size: 8px; letter-spacing: .08em; }
+.office-fallback-workstations { display: flex; min-height: 22px; flex-wrap: wrap; align-items: flex-start; gap: 4px; margin-top: auto; }
+.office-fallback-person { display: inline-flex; min-width: 0; align-items: center; gap: 5px; padding: 4px 7px; border: 1px solid #373737; border-radius: 99px; background: #202020; color: #c9c9c9; font-size: 9px; cursor: pointer; transition: border-color .14s ease, background .14s ease; }
+.office-fallback-person:hover, .office-fallback-person:focus-visible, .office-fallback-person.selected { border-color: color-mix(in srgb, var(--department-color) 55%, #777); background: color-mix(in srgb, var(--department-color) 15%, #202020); color: #fff; outline: none; }
+.office-fallback-person-dot { width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: var(--department-color); }
+.office-fallback-person-initials { display: none; }
+.office-fallback-person.compact { width: 23px; height: 23px; justify-content: center; padding: 0; border-radius: 50%; font-size: 8px; }
+.office-fallback-person.compact .office-fallback-person-initials { display: grid; place-items: center; }
+.office-fallback-person-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.office-fallback-empty { color: #676767; font-size: 9px; }
 .office-label-layer { position: absolute; z-index: 2; inset: 0; overflow: hidden; pointer-events: none; }
 .office-world-label { position: absolute; display: flex; align-items: center; gap: 5px; min-height: 22px; padding: 0 7px; transform: translate(-50%, -100%); border: 1px solid color-mix(in srgb, var(--department-color) 38%, #343434); border-radius: 999px; background: color-mix(in srgb, var(--department-color) 13%, #191a1c); box-shadow: 0 2px 7px #0003; color: #deddd8; font: 550 10px/1.1 var(--sans); white-space: nowrap; backdrop-filter: blur(6px); }
 .office-world-label.employee { min-height: 21px; padding: 0 7px 0 6px; font-size: 10px; }
@@ -333,6 +356,7 @@ tr[data-employee]:hover td { background: #1a1a1a; }
   .view { padding-right: 68px; }
   .office-view { grid-template-columns: 1fr; overflow: auto; }
   .office-stage { min-height: 610px; border-right: 0; border-bottom: 1px solid #2a2a2a; }
+  .office-fallback-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .manager-panel { right: 10px; bottom: 10px; width: min(400px, calc(100% - 20px)); height: min(52%, 420px); min-height: 280px; }
   .team-card { width: 165px; max-height: 38%; }
   .page { padding: 26px 20px 40px; }
@@ -365,6 +389,11 @@ tr[data-employee]:hover td { background: #1a1a1a; }
   .office-scene-actions .button { min-height: 25px; padding: 0 7px; font-size: 8px; }
   .office-live-activity { bottom: 88px; max-width: 88%; padding: 7px 9px; }
   .office-live-activity span { max-width: 200px; }
+  .office-fallback { padding: 14px; }
+  .office-fallback-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+  .office-fallback-room { min-height: 94px; padding: 9px; }
+  .office-fallback-title { font-size: 19px; }
+  .office-fallback-badge { padding: 5px 6px; font-size: 7px; }
   .quiet-banner { bottom: 8px; max-width: 90%; padding: 7px 9px; font-size: 8px; }
   .page { padding: 22px 14px 35px; }
   .page h1 { font-size: 27px; }
@@ -420,6 +449,15 @@ tr[data-employee]:hover td { background: #1a1a1a; }
 .workspace-switch span, .icon-button { color: #687083; }
 .view, .office-stage { background: #f4f6fa; }
 .office-stage { border-right-color: var(--line); }
+.office-3d-fallback { background: radial-gradient(ellipse at 50% 40%, #fff 0, #f1f3f6 70%); scrollbar-color: #c7cbd3 transparent; }
+.office-fallback-title { color: #252735; }
+.office-fallback-eyebrow, .office-fallback-notice { color: #72798a; }
+.office-fallback-badge { border-color: #d8dce4; background: rgba(255,255,255,.7); color: #606879; }
+.office-fallback-room { border-color: color-mix(in srgb, var(--department-color) 32%, #dfe3e9); background: linear-gradient(145deg, color-mix(in srgb, var(--department-color) 10%, #fff), #fff 76%); box-shadow: 0 5px 18px rgba(31,39,61,.045); }
+.office-fallback-room-heading h3 { color: #303544; }
+.office-fallback-count, .office-fallback-empty { color: #7a8190; }
+.office-fallback-person { border-color: #e2e5eb; background: #fff; color: #4f586a; }
+.office-fallback-person:hover, .office-fallback-person:focus-visible, .office-fallback-person.selected { border-color: color-mix(in srgb, var(--department-color) 52%, #c2c7d1); background: color-mix(in srgb, var(--department-color) 14%, #fff); color: #252735; }
 .office-summary, .team-card, .office-tools, .quiet-banner, .office-hover-card,
 .office-live-activity { border-color: #e0e4ed; background: rgba(255,255,255,.94); box-shadow: 0 8px 28px rgba(31,39,61,.08); }
 .office-world-label { border-color: color-mix(in srgb, var(--department-color) 44%, #e0e4ed); background: color-mix(in srgb, var(--department-color) 13%, #fff); color: #293044; }

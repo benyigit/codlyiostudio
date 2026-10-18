@@ -1,4 +1,4 @@
-import { mountOffice3D, setOffice3DVisible } from "./office3d.js";
+import { mountOffice3D, mountOfficeFallback, setOffice3DVisible } from "./office3d.js";
 import { createWorkspaceStore } from "./workspace-store.js";
 
 (function () {
@@ -148,6 +148,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
   let cloudSaveChain = Promise.resolve();
   let cloudRestoreInProgress = false;
   let cloudRevision = null;
+  let office3DFailure = null;
   let cloudConflictNotified = false;
   let cloudSessionGeneration = 0;
   let activatingUserId = "";
@@ -801,6 +802,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
     const officeScene = document.getElementById("office-3d");
     if (officeScene) {
       try {
+        if (office3DFailure) throw office3DFailure;
         mountOffice3D(officeScene, state.employees, {
           mapScale: state.mapScale,
           mapRotate: state.mapRotate,
@@ -827,9 +829,20 @@ import { createWorkspaceStore } from "./workspace-store.js";
           card.classList.remove("hidden");
         }, function (zoom) { state.mapScale = zoom; });
       } catch (error) {
+        office3DFailure = error;
         setOffice3DVisible(false);
-        officeScene.textContent = "The 3D office could not start. Enable WebGL in this browser and reload.";
-        officeScene.classList.add("office-3d-error");
+        console.error("The 3D office could not start; showing the interactive fallback.", error);
+        mountOfficeFallback(officeScene, state.employees, {
+          mapScale: state.mapScale,
+          showNames: state.showNames,
+          selectedEmployee: state.selectedEmployee
+        }, function (employeeId) {
+          state.selectedEmployee = employeeId;
+          state.currentPage = "employee";
+          render();
+        });
+        const sceneHint = officeScene.closest(".office-stage")?.querySelector(".scene-hint");
+        if (sceneHint) sceneHint.textContent = "Interactive employee map · 2D mode";
       }
     } else setOffice3DVisible(false);
     syncSendButton();
