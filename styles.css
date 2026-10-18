@@ -187,9 +187,10 @@ button { color: inherit; }
 .team-list-toggle { display: grid; place-items: center; width: 24px; height: 24px; margin: -4px -5px -4px 0; border: 1px solid #373737; border-radius: 6px; background: #202020; color: #d0cfca; font-size: 13px; cursor: pointer; }
 .team-list-toggle:hover, .team-list-toggle:focus-visible { border-color: #777; background: #292929; outline: none; }
 .team-card-open { max-height: 44%; }
-.team-person { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 1px; border: 0; background: transparent; text-align: left; cursor: pointer; }
+.team-person { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 5px; border: 0; border-radius: 6px; background: transparent; text-align: left; cursor: pointer; }
+.team-person:hover, .team-person:focus-visible { background: color-mix(in srgb, var(--department-color) 9%, #151515); outline: none; }
 .team-person:hover .team-person-name { color: #fff; }
-.team-color { flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; }
+.team-color { flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--department-color); box-shadow: 0 0 0 2px color-mix(in srgb, var(--department-color) 18%, transparent); }
 .team-person-copy { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .team-person-name { color: #e1e0dc; font-size: 11px; }
 .team-person-status { color: #898883; font-size: 9px; }
@@ -494,6 +495,7 @@ tr[data-employee]:hover td { background: #1a1a1a; }
 .office-world-label { border-color: color-mix(in srgb, var(--department-color) 44%, #e0e4ed); background: color-mix(in srgb, var(--department-color) 13%, #fff); color: #293044; }
 .team-list-toggle { border-color: #e0e4ed; background: #f4f6fa; color: #252735; }
 .team-list-toggle:hover, .team-list-toggle:focus-visible { border-color: #aab0bd; background: #e9ebf0; }
+.team-person:hover, .team-person:focus-visible { background: color-mix(in srgb, var(--department-color) 10%, #fff); }
 .manager-panel-close { color: #687083; }
 .manager-panel-close:hover, .manager-panel-close:focus-visible { border-color: #dfe3ec; background: #f2f4f8; color: #252735; }
 .office-panel-reopen { border-color: #dfe3ec; background: rgba(255,255,255,.96); color: #252735; box-shadow: 0 6px 20px rgba(31,39,61,.12); }

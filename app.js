@@ -1,4 +1,4 @@
-import { mountOffice3D, mountOfficeFallback, setOffice3DVisible } from "./office3d.js";
+import { getDepartmentColor, mountOffice3D, mountOfficeFallback, setOffice3DVisible } from "./office3d.js";
 import { createWorkspaceStore } from "./workspace-store.js";
 
 (function () {
@@ -629,9 +629,9 @@ import { createWorkspaceStore } from "./workspace-store.js";
 
   function renderTeamCard() {
     const rows = state.employees.map(function (person) {
-      const color = person.status === "Offline" ? "#68759d" : person.status === "Coffee" ? "#c99a5d" : person.status === "Meeting" || person.status === "Speaking" ? "#9d8bf0" : "#a288e9";
+      const color = getDepartmentColor(person.department);
       const description = person.status === "Coffee" ? "getting coffee" : person.status === "Meeting" ? "in a meeting" : person.status === "Speaking" ? "speaking" : person.status === "Working" ? "on a task" : person.status === "Offline" ? "away" : "at their desk";
-      return '<button class="team-person" data-employee="' + esc(person.id) + '"><span class="team-color" style="background:' + color + '"></span><span class="team-person-copy"><span class="team-person-name">' + esc(person.name) + ' <span class="muted">' + esc(person.status) + '</span></span><span class="team-person-status">' + description + '</span></span></button>';
+      return '<button class="team-person" data-employee="' + esc(person.id) + '" style="--department-color:' + color + '" title="' + esc(person.department) + '"><span class="team-color"></span><span class="team-person-copy"><span class="team-person-name">' + esc(person.name) + ' <span class="muted">' + esc(person.status) + '</span></span><span class="team-person-status">' + description + '</span></span></button>';
     }).join("");
     const active = state.employees.filter(function (item) { return ["Working", "Meeting", "Speaking"].includes(item.status); }).length;
     const toggleLabel = state.teamListOpen ? "Collapse team list" : "Expand team list";

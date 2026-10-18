@@ -5,6 +5,10 @@ const DEPARTMENTS = [
   "Content", "Customer Support", "Operations", "Advertising", "Growth & Marketing", "Content studio"
 ];
 const DEPARTMENT_COLORS = ["#a394c5", "#839ab8", "#80a999", "#b5a36f", "#8194b8", "#b18491", "#a187a8", "#ad9277", "#849b84", "#ae8d70", "#aa8290", "#819ba5"];
+export function getDepartmentColor(department) {
+  const index = DEPARTMENTS.indexOf(department);
+  return DEPARTMENT_COLORS[index < 0 ? 0 : index];
+}
 const COLS = [-24, -8, 8, 24];
 const ROWS = [-16, 0, 16];
 const ROOM_WIDTH = 12;
