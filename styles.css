@@ -193,7 +193,8 @@ button { color: inherit; }
 .team-person-name { color: #e1e0dc; font-size: 11px; }
 .team-person-status { color: #898883; font-size: 9px; }
 .office-tools { position: absolute; z-index: 3; left: 16px; bottom: 68px; display: flex; flex-direction: column; gap: 0; padding: 3px; border: 1px solid #2b2b2b; border-radius: 8px; background: #171717ec; }
-.office-tools button { display: grid; place-items: center; width: 26px; height: 29px; border: 0; background: transparent; color: #b8b7b2; font-size: 15px; cursor: pointer; }
+.office-tools button { display: grid; place-items: center; width: 30px; height: 31px; border: 0; border-radius: 6px; background: transparent; color: #b8b7b2; cursor: pointer; }
+.office-tools button svg { display: block; width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .office-tools button:hover { color: #fff; }
 .office-options { position: absolute; right: 16px; bottom: 18px; display: flex; align-items: center; gap: 12px; color: #aaa9a4; font-size: 9px; }
 .office-options label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
