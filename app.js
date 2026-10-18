@@ -27,9 +27,47 @@ import { createWorkspaceStore } from "./workspace-store.js";
     window.codlyioI18n?.setTheme(light ? "light" : "dark");
   }
   applyStudioTheme(window.codlyioI18n?.getTheme() || (localStorage.getItem(THEME_STORE) === "dark" ? "dark" : "light"));
-  document.querySelectorAll(".nav-item[aria-label]").forEach(function (item) {
-    item.title = item.getAttribute("aria-label") || "";
+  const navTooltip = document.getElementById("nav-tooltip");
+  let navTooltipTarget = null;
+  function showNavTooltip(item) {
+    if (!navTooltip || !item) return;
+    const label = item.getAttribute("aria-label");
+    if (!label) return;
+    navTooltipTarget = item;
+    navTooltip.textContent = label;
+    navTooltip.classList.remove("hidden");
+    item.setAttribute("aria-describedby", "nav-tooltip");
+    const itemRect = item.getBoundingClientRect();
+    const tooltipRect = navTooltip.getBoundingClientRect();
+    const left = Math.max(8, itemRect.left - tooltipRect.width - 10);
+    const top = Math.min(window.innerHeight - tooltipRect.height - 8, Math.max(8, itemRect.top + (itemRect.height - tooltipRect.height) / 2));
+    navTooltip.style.left = left + "px";
+    navTooltip.style.top = top + "px";
+  }
+  function hideNavTooltip(item) {
+    if (!navTooltip || (item && navTooltipTarget !== item)) return;
+    navTooltipTarget?.removeAttribute("aria-describedby");
+    navTooltipTarget = null;
+    navTooltip.classList.add("hidden");
+  }
+  document.addEventListener("pointerover", function (event) {
+    const item = event.target.closest?.(".nav-item[aria-label]");
+    if (item) showNavTooltip(item);
   });
+  document.addEventListener("pointerout", function (event) {
+    const item = event.target.closest?.(".nav-item[aria-label]");
+    if (item && !item.contains(event.relatedTarget)) hideNavTooltip(item);
+  });
+  document.addEventListener("focusin", function (event) {
+    const item = event.target.closest?.(".nav-item[aria-label]");
+    if (item) showNavTooltip(item);
+  });
+  document.addEventListener("focusout", function (event) {
+    const item = event.target.closest?.(".nav-item[aria-label]");
+    if (item && !item.contains(event.relatedTarget)) hideNavTooltip(item);
+  });
+  window.addEventListener("resize", function () { hideNavTooltip(); });
+  window.addEventListener("scroll", function () { hideNavTooltip(); }, true);
   const SEED_EMPLOYEES = [
     ["Alex", "Chief AI Manager", "Executive", "Reasoning", "Planning · Delegation · Coordination"],
     ["Oliver", "Research Analyst", "Research", "Balanced", "Market research · Web research · Source analysis"],

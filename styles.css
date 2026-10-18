@@ -37,11 +37,12 @@ button { color: inherit; }
 .nav-item:hover { transform: translateX(-2px); }
 .nav-item.active { background: #292929; color: #fff; }
 .nav-item.active::before { position: absolute; top: 50%; right: -8px; width: 3px; height: 15px; transform: translateY(-50%); border-radius: 3px; background: #e5e5e5; content: ""; }
-.nav-item::after { position: absolute; z-index: 50; top: 50%; right: calc(100% + 12px); transform: translate(4px, -50%); padding: 7px 10px; border: 1px solid #393939; border-radius: 8px; background: #1b1b1b; box-shadow: 0 8px 24px #0007; color: #f1f1f1; content: attr(aria-label); font-size: 11px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity .14s ease, transform .14s ease; white-space: nowrap; }
-.nav-item:hover::after, .nav-item:focus-visible::after { transform: translate(0, -50%); opacity: 1; }
 .nav-icon { display: grid; place-items: center; width: 16px; height: 16px; flex: 0 0 16px; color: #92918c; }
 .nav-icon svg { display: block; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .nav-item.active .nav-icon { color: inherit; }
+.nav-tooltip { position: fixed; z-index: 100; max-width: 200px; padding: 7px 10px; border: 1px solid #393939; border-radius: 8px; background: #1b1b1b; box-shadow: 0 8px 24px #0007; color: #f1f1f1; font-size: 11px; font-weight: 550; line-height: 1.2; pointer-events: none; white-space: nowrap; animation: nav-tooltip-in .12s ease-out; }
+.nav-tooltip::after { position: absolute; top: 50%; right: -4px; width: 6px; height: 6px; transform: translateY(-50%) rotate(45deg); border-top: 1px solid #393939; border-right: 1px solid #393939; background: #1b1b1b; content: ""; }
+@keyframes nav-tooltip-in { from { opacity: 0; transform: translateX(3px); } to { opacity: 1; transform: translateX(0); } }
 .nav-count { position: absolute; top: 1px; right: 0; min-width: 15px; padding: 2px 4px; border: 1px solid #101010; border-radius: 99px; background: #aaa; color: #111; font-size: 9px; line-height: 1; }
 .hidden { display: none !important; }
 .sidebar-foot { position: relative; display: grid; place-items: center; flex: 0 0 8px; width: 8px; height: 8px; margin: 9px auto 1px; padding: 0; color: #797873; font-size: 0; }
@@ -446,7 +447,8 @@ tr[data-employee]:hover td { background: #1a1a1a; }
 .sidebar, .topbar, .view, .manager-panel, .settings-tabs { background: #fff; }
 .sidebar { border-color: var(--line); background: rgba(255,255,255,.9); box-shadow: 0 18px 55px rgba(25,31,45,.16); }
 .nav-label { background: #dfe2e8; }
-.nav-item::after { border-color: #e1e4ed; background: #fff; box-shadow: 0 8px 24px rgba(31,39,61,.15); color: #252735; }
+.nav-tooltip { border-color: #e1e4ed; background: #fff; box-shadow: 0 8px 24px rgba(31,39,61,.15); color: #252735; }
+.nav-tooltip::after { border-color: #e1e4ed; background: #fff; }
 .nav-item.active { background: #e9eaec; color: #171717; }
 .nav-item.active::before { background: #171717; }
 .nav-count { border-color: #fff; background: #3a3a3a; color: #fff; }
