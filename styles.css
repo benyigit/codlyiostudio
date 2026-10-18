@@ -48,10 +48,25 @@ button { color: inherit; }
 .sidebar-foot #runtime-mode { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .online-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #83bea0; box-shadow: 0 0 10px #83bea044; }
 .online-dot.offline { background: #a66f65; box-shadow: 0 0 8px #a66f6544; }
-.topbar { grid-column: 1; grid-row: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 88px 0 22px; border-bottom: 1px solid #252525; background: #121212; }
-.workspace-switch { display: flex; align-items: center; gap: 8px; padding: 5px 7px; border: 0; background: transparent; color: #deddd9; font-size: 13px; cursor: pointer; }
-.workspace-switch span { color: #8b8a85; font-size: 16px; }
-.topbar-actions { display: flex; align-items: center; gap: 15px; }
+.topbar { position: relative; z-index: 10; grid-column: 1; grid-row: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 80px 0 22px; border-bottom: 1px solid #252525; background: #121212; }
+.workspace-switcher { position: relative; min-width: 0; }
+.workspace-switch { display: flex; min-height: 34px; align-items: center; gap: 8px; padding: 5px 7px; border: 0; border-radius: 8px; background: transparent; color: #deddd9; font-size: 13px; cursor: pointer; }
+.workspace-switch:hover, .workspace-switch[aria-expanded="true"] { background: #1c1c1c; }
+.workspace-switch-name { overflow: hidden; max-width: min(34vw, 220px); text-overflow: ellipsis; white-space: nowrap; }
+.workspace-switch-chevron { display: grid; width: 20px; height: 20px; flex: 0 0 20px; place-items: center; border: 1px solid transparent; border-radius: 6px; color: #8b8a85; transition: transform .16s ease, background .16s ease; }
+.workspace-switch-chevron svg { display: block; width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.workspace-switch[aria-expanded="true"] .workspace-switch-chevron { transform: rotate(180deg); background: #262626; }
+.workspace-menu { position: absolute; z-index: 70; top: calc(100% + 7px); left: 0; width: min(270px, calc(100vw - 24px)); padding: 7px; border: 1px solid #363636; border-radius: 12px; background: #171717f5; box-shadow: 0 16px 42px #0008; backdrop-filter: blur(18px); }
+.workspace-menu-title { padding: 8px 10px 6px; color: #85847f; font-size: 9px; font-weight: 650; letter-spacing: .1em; text-transform: uppercase; }
+.workspace-menu-item, .workspace-menu-create { display: flex; width: 100%; min-height: 36px; align-items: center; justify-content: space-between; gap: 12px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; color: #c9c8c3; font-size: 11px; text-align: left; cursor: pointer; }
+.workspace-menu-item:hover, .workspace-menu-item.active { background: #252525; color: #f1f0ec; }
+.workspace-menu-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.workspace-menu-check { color: #b9b9b2; font-size: 12px; }
+.workspace-menu-separator { height: 1px; margin: 6px 4px; background: #2b2b2b; }
+.workspace-menu-create { justify-content: flex-start; color: #e4e3df; }
+.workspace-menu-create:hover { background: #252525; }
+.workspace-menu-create > span:first-child { display: grid; width: 19px; height: 19px; place-items: center; border: 1px solid #464646; border-radius: 6px; color: #ddd; font-size: 14px; }
+.topbar-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 15px; margin-left: auto; }
 .live-pill { display: flex; align-items: center; gap: 7px; color: #aaa9a5; font-size: 10px; }
 .icon-button { position: relative; display: grid; place-items: center; width: 28px; height: 28px; border: 0; background: transparent; color: #aaa9a4; font-size: 16px; cursor: pointer; }
 .theme-toggle { display: inline-flex; min-height: 30px; align-items: center; justify-content: center; gap: 6px; padding: 0 9px; border: 1px solid #353535; border-radius: 8px; background: #191919; color: #f1f1f1; font-size: 10px; cursor: pointer; white-space: nowrap; }
@@ -354,7 +369,7 @@ tr[data-employee]:hover td { background: #1a1a1a; }
   .nav-label { width: 19px; margin: 4px 0; }
   .nav-item { flex-basis: 35px; width: 38px; height: 35px; }
   .nav-icon { width: 16px; height: 16px; }
-  .topbar { padding-right: 74px; }
+  .topbar { padding-right: 60px; }
   .view { padding-right: 68px; }
   .office-view { grid-template-columns: 1fr; overflow: auto; }
   .office-stage { min-height: 610px; border-right: 0; border-bottom: 1px solid #2a2a2a; }
@@ -375,7 +390,7 @@ tr[data-employee]:hover td { background: #1a1a1a; }
   .nav-label { width: 17px; margin: 3px 0; }
   .nav-item { flex-basis: 32px; width: 34px; height: 32px; }
   .nav-icon svg { width: 16px; height: 16px; }
-  .topbar { padding: 0 66px 0 9px; }
+  .topbar { padding: 0 52px 0 9px; }
   .view { padding-right: 60px; }
   .topbar-actions { gap: 6px; }
   .live-pill, .stop-button span { display: none; }
@@ -448,7 +463,16 @@ tr[data-employee]:hover td { background: #1a1a1a; }
 .workspace-switch, .page h1, .manager-intro, .card h3, .settings-content h2,
 .modal-head h2, .metric-value, .integration-card h3, .workflow-row strong,
 .employee-cell, .dm-card-head p, .team-card-head, .team-person-name { color: #252735; }
-.workspace-switch span, .icon-button { color: #687083; }
+.workspace-switch-chevron, .icon-button { color: #687083; }
+.workspace-switch:hover, .workspace-switch[aria-expanded="true"] { background: #f1f3f7; }
+.workspace-switch[aria-expanded="true"] .workspace-switch-chevron { background: #e9ecf2; }
+.workspace-menu { border-color: #e1e4ec; background: rgba(255,255,255,.97); box-shadow: 0 16px 42px rgba(31,39,61,.16); }
+.workspace-menu-title { color: #7c8493; }
+.workspace-menu-item, .workspace-menu-create { color: #495164; }
+.workspace-menu-item:hover, .workspace-menu-item.active, .workspace-menu-create:hover { background: #f0f2f6; color: #202330; }
+.workspace-menu-check { color: #5d6574; }
+.workspace-menu-separator { background: #e5e8ee; }
+.workspace-menu-create > span:first-child { border-color: #d8dce4; color: #454d5c; }
 .view, .office-stage { background: #f4f6fa; }
 .office-stage { border-right-color: var(--line); }
 .office-3d-fallback { background: radial-gradient(ellipse at 50% 40%, #fff 0, #f1f3f6 70%); scrollbar-color: #c7cbd3 transparent; }

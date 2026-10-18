@@ -27,6 +27,9 @@ import { createWorkspaceStore } from "./workspace-store.js";
     window.codlyioI18n?.setTheme(light ? "light" : "dark");
   }
   applyStudioTheme(window.codlyioI18n?.getTheme() || (localStorage.getItem(THEME_STORE) === "dark" ? "dark" : "light"));
+  document.querySelectorAll(".nav-item[aria-label]").forEach(function (item) {
+    item.title = item.getAttribute("aria-label") || "";
+  });
   const SEED_EMPLOYEES = [
     ["Alex", "Chief AI Manager", "Executive", "Reasoning", "Planning · Delegation · Coordination"],
     ["Oliver", "Research Analyst", "Research", "Balanced", "Market research · Web research · Source analysis"],
@@ -76,7 +79,22 @@ import { createWorkspaceStore } from "./workspace-store.js";
 
   function loadSaved(snapshotOverride) {
     try {
-      const saved = snapshotOverride === undefined ? JSON.parse(localStorage.getItem(STORE) || "{}") : (snapshotOverride || {});
+      const stored = snapshotOverride === undefined ? JSON.parse(localStorage.getItem(STORE) || "{}") : (snapshotOverride || {});
+      let saved = stored;
+      let activeWorkspaceId = "workspace-default";
+      let workspaces = Array.isArray(stored.workspaces) ? stored.workspaces.filter(function (workspace) {
+        return workspace && workspace.id && workspace.data && typeof workspace.data === "object";
+      }).map(function (workspace) {
+        return { id: String(workspace.id), name: String(workspace.name || "Workspace"), data: workspace.data };
+      }) : [];
+      if (workspaces.length) {
+        const activeWorkspace = workspaces.find(function (workspace) { return workspace.id === stored.activeWorkspaceId; }) || workspaces[0];
+        activeWorkspaceId = activeWorkspace.id;
+        saved = activeWorkspace.data;
+      } else {
+        const workspaceName = stored.workspaceProfile?.name || stored.settings?.workspaceName || "Codlyio Studio";
+        workspaces = [{ id: activeWorkspaceId, name: workspaceName, data: stored }];
+      }
       const employees = seedEmployees().map(function (person) {
         const match = (saved.employees || []).find(function (item) { return item.id === person.id; });
         if (match) {
@@ -97,6 +115,9 @@ import { createWorkspaceStore } from "./workspace-store.js";
         directMessages: saved.directMessages && typeof saved.directMessages === "object" ? saved.directMessages : {},
         settings: saved.settings || {},
         workspaceProfile: saved.workspaceProfile && typeof saved.workspaceProfile === "object" ? saved.workspaceProfile : null,
+        workspaces: workspaces,
+        activeWorkspaceId: activeWorkspaceId,
+        workspaceMenuOpen: false,
         currentPage: "office",
         selectedEmployee: "",
         teamListOpen: false,
@@ -124,6 +145,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
     } catch (error) {
       return {
         employees: seedEmployees(), goals: [], tasks: [], workflows: [], activity: [], meetings: [], directMessages: {}, settings: {}, workspaceProfile: null,
+        workspaces: [{ id: "workspace-default", name: "Codlyio Studio", data: {} }], activeWorkspaceId: "workspace-default", workspaceMenuOpen: false,
         currentPage: "office", selectedEmployee: "", managerTab: "manager", approvalTab: "Waiting",
         teamListOpen: false, managerPanelOpen: true,
         taskTab: "Goals", taskFilter: "All", settingsTab: "General", integrationCategory: "Popular",
@@ -169,8 +191,8 @@ import { createWorkspaceStore } from "./workspace-store.js";
     }, {});
   }
 
-  function persistedSnapshot() {
-    const snapshot = {
+  function persistedWorkspaceData() {
+    return {
       employees: state.employees.map(function (person) {
         return {
           id: person.id,
@@ -195,7 +217,29 @@ import { createWorkspaceStore } from "./workspace-store.js";
       settings: state.settings,
       workspaceProfile: state.workspaceProfile
     };
-    return scrubSecrets(snapshot);
+  }
+
+  function persistedSnapshot() {
+    const currentData = persistedWorkspaceData();
+    const activeWorkspaceId = state.activeWorkspaceId || "workspace-default";
+    let hasActiveWorkspace = false;
+    const workspaces = (state.workspaces || []).map(function (workspace) {
+      if (workspace.id !== activeWorkspaceId) return workspace;
+      hasActiveWorkspace = true;
+      return {
+        id: workspace.id,
+        name: (currentData.workspaceProfile && currentData.workspaceProfile.name) || currentData.settings.workspaceName || workspace.name,
+        data: currentData
+      };
+    });
+    if (!hasActiveWorkspace) {
+      workspaces.push({
+        id: activeWorkspaceId,
+        name: (currentData.workspaceProfile && currentData.workspaceProfile.name) || currentData.settings.workspaceName || "Codlyio Studio",
+        data: currentData
+      });
+    }
+    return scrubSecrets(Object.assign({}, currentData, { workspaces: workspaces, activeWorkspaceId: activeWorkspaceId }));
   }
 
   function saveLocalSnapshot(snapshot) {
@@ -248,7 +292,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
 
   function applySnapshot(snapshot) {
     const restored = loadSaved(snapshot);
-    ["employees", "goals", "tasks", "workflows", "activity", "meetings", "directMessages", "settings", "workspaceProfile"].forEach(function (key) {
+    ["employees", "goals", "tasks", "workflows", "activity", "meetings", "directMessages", "settings", "workspaceProfile", "workspaces", "activeWorkspaceId"].forEach(function (key) {
       state[key] = restored[key];
     });
   }
@@ -462,6 +506,82 @@ import { createWorkspaceStore } from "./workspace-store.js";
   }
 
   function closeModal() { modalRoot.innerHTML = ""; }
+
+  function renderWorkspaceMenu() {
+    const menu = document.getElementById("workspace-menu");
+    const switchButton = document.getElementById("workspace-switch");
+    if (!menu) return;
+    const workspaces = state.workspaces || [];
+    menu.innerHTML = '<div class="workspace-menu-title">Workspaces</div>' + workspaces.map(function (workspace) {
+      const active = workspace.id === state.activeWorkspaceId;
+      return '<button class="workspace-menu-item' + (active ? ' active' : '') + '" type="button" role="menuitemradio" aria-checked="' + active + '" data-workspace-id="' + esc(workspace.id) + '"><span class="workspace-menu-name">' + esc(workspace.name) + '</span><span class="workspace-menu-check" aria-hidden="true">' + (active ? '✓' : '') + '</span></button>';
+    }).join("") + '<div class="workspace-menu-separator"></div><button class="workspace-menu-create" type="button" data-action="create-workspace"><span aria-hidden="true">＋</span><span>Create workspace</span></button>';
+    menu.classList.toggle("hidden", !state.workspaceMenuOpen);
+    if (switchButton) switchButton.setAttribute("aria-expanded", String(state.workspaceMenuOpen));
+  }
+
+  function switchWorkspace(workspaceId) {
+    const currentSnapshot = persistedSnapshot();
+    state.workspaces = currentSnapshot.workspaces;
+    const workspace = state.workspaces.find(function (item) { return item.id === workspaceId; });
+    if (!workspace) return;
+    state.workspaceMenuOpen = false;
+    if (workspace.id === state.activeWorkspaceId) {
+      renderWorkspaceMenu();
+      return;
+    }
+    currentSnapshot.activeWorkspaceId = workspace.id;
+    applySnapshot(currentSnapshot);
+    state.currentPage = "office";
+    state.selectedEmployee = "";
+    persist();
+    render();
+  }
+
+  function openWorkspaceCreation() {
+    showModal("Create a workspace", '<p class="page-subtitle">Choose a name and type for your new workspace. Existing workspace data stays separate.</p><form id="create-workspace-form"><label class="auth-field"><span>Workspace name</span><input name="name" maxlength="60" required placeholder="e.g. Acme Studio"></label><div class="onboarding-grid"><label class="auth-field"><span>Workspace type</span><select name="type"><option value="Company">Company</option><option value="Personal">Personal workspace</option></select></label><label class="auth-field"><span>Industry</span><select name="industry"><option value="">Choose an industry</option><option>Technology</option><option>Creative &amp; design</option><option>Marketing</option><option>E-commerce</option><option>Education</option><option>Other</option></select></label></div><label class="auth-field"><span>What do you want to build?</span><textarea name="description" maxlength="280" rows="3" placeholder="Briefly describe your company, project, or goals…"></textarea></label><label class="auth-field"><span>Website <em>optional</em></span><input name="website" type="url" maxlength="200" placeholder="https://example.com"></label><div class="modal-actions"><button class="button" type="button" data-action="close-modal">Cancel</button><button class="button primary" type="submit">Create workspace</button></div></form>', "", "workspace-create-modal");
+  }
+
+  function createWorkspace(form) {
+    const data = new FormData(form);
+    const name = String(data.get("name") || "").trim();
+    if (!name) return;
+    const now = new Date().toISOString();
+    const profile = {
+      name: name,
+      type: String(data.get("type") || "Company"),
+      industry: String(data.get("industry") || ""),
+      description: String(data.get("description") || "").trim(),
+      website: String(data.get("website") || "").trim(),
+      createdAt: now
+    };
+    const currentSnapshot = persistedSnapshot();
+    const workspaceId = "workspace-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+    currentSnapshot.workspaces.push({
+      id: workspaceId,
+      name: name,
+      data: {
+        employees: seedEmployees(),
+        goals: [],
+        tasks: [],
+        workflows: [],
+        activity: [],
+        meetings: [],
+        directMessages: {},
+        settings: { workspaceName: name },
+        workspaceProfile: profile
+      }
+    });
+    currentSnapshot.activeWorkspaceId = workspaceId;
+    state.workspaceMenuOpen = false;
+    applySnapshot(currentSnapshot);
+    state.currentPage = "office";
+    state.selectedEmployee = "";
+    persist();
+    closeModal();
+    render();
+    toast(cloudUser ? "Workspace created and saved to your account." : "Workspace created and saved on this device.");
+  }
 
   function initials(name) { return String(name).split(/\s+/).map(function (part) { return part.slice(0, 1); }).join("").slice(0, 2).toUpperCase(); }
   function employeeDot(person, extraClass) {
@@ -783,9 +903,11 @@ import { createWorkspaceStore } from "./workspace-store.js";
     const workspaceSwitch = document.getElementById("workspace-switch");
     const accountButton = document.getElementById("account-menu");
     if (workspaceSwitch) {
-      const label = workspaceSwitch.firstChild;
-      if (label) label.textContent = ((state.workspaceProfile && state.workspaceProfile.name) || state.settings.workspaceName || "Codlyio Studio") + " ";
+      const activeWorkspace = (state.workspaces || []).find(function (workspace) { return workspace.id === state.activeWorkspaceId; });
+      const label = workspaceSwitch.querySelector(".workspace-switch-name");
+      if (label) label.textContent = (activeWorkspace && activeWorkspace.name) || (state.workspaceProfile && state.workspaceProfile.name) || state.settings.workspaceName || "Codlyio Studio";
     }
+    renderWorkspaceMenu();
     if (accountButton) {
       accountButton.textContent = cloudUser && cloudUser.email ? cloudUser.email.slice(0, 1).toUpperCase() : "Y";
       accountButton.title = cloudUser ? cloudUser.email : "Local profile";
@@ -1249,6 +1371,20 @@ import { createWorkspaceStore } from "./workspace-store.js";
 
   document.addEventListener("click", function (event) {
     const target = event.target;
+    if (state.workspaceMenuOpen && !target.closest(".workspace-switcher")) {
+      state.workspaceMenuOpen = false;
+      renderWorkspaceMenu();
+    }
+    if (target.closest("#workspace-switch")) {
+      state.workspaceMenuOpen = !state.workspaceMenuOpen;
+      renderWorkspaceMenu();
+      return;
+    }
+    const workspaceItem = target.closest("[data-workspace-id]");
+    if (workspaceItem) {
+      switchWorkspace(workspaceItem.dataset.workspaceId);
+      return;
+    }
     const authModeButton = target.closest("[data-auth-mode]");
     if (authModeButton) {
       authMode = authModeButton.dataset.authMode;
@@ -1276,6 +1412,11 @@ import { createWorkspaceStore } from "./workspace-store.js";
       else if (name === "sign-out") {
         if (workspaceStore) workspaceStore.signOut().catch(function (error) { toast("Could not sign out: " + error.message); });
         closeModal();
+      }
+      else if (name === "create-workspace") {
+        state.workspaceMenuOpen = false;
+        renderWorkspaceMenu();
+        openWorkspaceCreation();
       }
       else if (name === "new-workflow") openWorkflowModal();
       else if (name === "new-meeting") openMeetingModal();
@@ -1370,7 +1511,6 @@ import { createWorkspaceStore } from "./workspace-store.js";
       state.settings[key] = !state.settings[key];
       persist(); render(); return;
     }
-    if (target.closest("#workspace-switch")) toast("Only one local workspace is available in this prototype.");
     if (target.closest("#notifications-button")) toast("No new notifications.");
     if (target.closest("#account-menu")) {
       if (cloudUser) {
@@ -1437,6 +1577,10 @@ import { createWorkspaceStore } from "./workspace-store.js";
       submitGoal(event.target.value);
     }
     if (event.key === "Escape") closeModal();
+    if (event.key === "Escape" && state.workspaceMenuOpen) {
+      state.workspaceMenuOpen = false;
+      renderWorkspaceMenu();
+    }
   });
 
   document.addEventListener("submit", async function (event) {
@@ -1473,6 +1617,9 @@ import { createWorkspaceStore } from "./workspace-store.js";
       hideWorkspaceOnboarding();
       render();
       toast("Workspace profile saved to your account.");
+    } else if (event.target.id === "create-workspace-form") {
+      event.preventDefault();
+      createWorkspace(event.target);
     } else if (event.target.id === "manager-form") {
       event.preventDefault();
       const input = document.getElementById("manager-input");

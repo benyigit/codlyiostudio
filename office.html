@@ -52,7 +52,10 @@
       </aside>
 
       <header class="topbar">
-        <button class="workspace-switch" id="workspace-switch">Codlyio Studio <span>⌄</span></button>
+        <div class="workspace-switcher">
+          <button class="workspace-switch" id="workspace-switch" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Switch workspace" title="Switch workspace"><span class="workspace-switch-name">Codlyio Studio</span><span class="workspace-switch-chevron" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="m4 6 4 4 4-4" /></svg></span></button>
+          <div class="workspace-menu hidden" id="workspace-menu" role="menu" aria-label="Workspaces"></div>
+        </div>
         <div class="topbar-actions">
           <span class="live-pill" id="runtime-indicator"><span class="online-dot" id="runtime-pill-dot"></span> Connecting…</span>
           <button class="icon-button" id="notifications-button" aria-label="Notifications">♧<span class="notification-dot"></span></button>
