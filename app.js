@@ -110,7 +110,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
         integrationSearch: "",
         calendarDate: new Date(),
         calendarMode: "Month",
-        showNames: true,
+        showNames: false,
         reduceMotion: false,
         mapScale: 1.1,
         mapRotate: 0,
@@ -127,7 +127,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
         currentPage: "office", selectedEmployee: "", managerTab: "manager", approvalTab: "Waiting",
         teamListOpen: false, managerPanelOpen: true,
         taskTab: "Goals", taskFilter: "All", settingsTab: "General", integrationCategory: "Popular",
-        integrationSearch: "", calendarDate: new Date(), calendarMode: "Month", showNames: true,
+        integrationSearch: "", calendarDate: new Date(), calendarMode: "Month", showNames: false,
         reduceMotion: false, mapScale: 1.1, mapRotate: 0, emergency: false,
         apiOnline: false, serverRoutes: {}, busyManager: false, runningGoalId: "", officeActivity: null
       };

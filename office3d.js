@@ -4,7 +4,7 @@ const DEPARTMENTS = [
   "Executive", "Product", "Research", "Data & Analytics", "Software Development", "Design",
   "Content", "Customer Support", "Operations", "Advertising", "Growth & Marketing", "Content studio"
 ];
-const DEPARTMENT_COLORS = ["#a38de8", "#7798d0", "#70a98a", "#d3b15f", "#7489d0", "#d88aa8", "#bd87bb", "#bd9657", "#7d9b72", "#d09a58", "#c27691", "#8299c1"];
+const DEPARTMENT_COLORS = ["#a394c5", "#839ab8", "#80a999", "#b5a36f", "#8194b8", "#b18491", "#a187a8", "#ad9277", "#849b84", "#ae8d70", "#aa8290", "#819ba5"];
 const COLS = [-24, -8, 8, 24];
 const ROWS = [-16, 0, 16];
 const ROOM_WIDTH = 12;
@@ -15,7 +15,7 @@ const MEETING_CENTER = { x: 21, z: 26 };
 const SERVER_ROOM = { x: -20.8, z: 2.55, width: 4.2, depth: 6.1 };
 const ZOOM_MIN = 0.62;
 const ZOOM_MAX = 4.5;
-const state = { renderer: null, scene: null, camera: null, observer: null, raycaster: null, pointer: null, workers: new Map(), container: null, labelLayer: null, roomLabels: [], labelPosition: new THREE.Vector3(), visible: false, options: {}, azimuth: 0.72, dragAzimuth: 0, polar: 0.78, distance: 82, selected: "", lastTime: 0, onSelect: null, onHover: null, onZoom: null, hovered: "", ground: null, lastMapScale: null };
+const state = { renderer: null, scene: null, camera: null, observer: null, raycaster: null, pointer: null, workers: new Map(), container: null, labelLayer: null, roomLabels: [], labelPosition: new THREE.Vector3(), visible: false, options: {}, azimuth: 0.72, dragAzimuth: 0, polar: 0.78, distance: 82, selected: "", lastTime: 0, lastLabelUpdate: 0, onSelect: null, onHover: null, onZoom: null, hovered: "", ground: null, lastMapScale: null };
 
 function material(color, roughness = 0.78, extra = {}) {
   return new THREE.MeshStandardMaterial(Object.assign({ color, roughness }, extra));
@@ -57,6 +57,7 @@ function makeWorldLabel(kind, text, color) {
   const element = document.createElement("div");
   element.className = `office-world-label ${kind}`;
   element.setAttribute("aria-hidden", "true");
+  element.style.setProperty("--department-color", color);
   const dot = document.createElement("span");
   dot.className = "office-label-dot";
   dot.style.backgroundColor = color;
@@ -85,27 +86,52 @@ function ensureWorldLabelLayer(container) {
 
 function updateWorldLabels() {
   if (!state.labelLayer || !state.container || !state.camera) return;
+  const now = performance.now();
+  if (now - state.lastLabelUpdate < 80) return;
+  state.lastLabelUpdate = now;
   const width = state.container.clientWidth;
   const height = state.container.clientHeight;
-  const place = (element, position) => {
-    state.labelPosition.copy(position).project(state.camera);
-    const x = (state.labelPosition.x * 0.5 + 0.5) * width;
-    const y = (-state.labelPosition.y * 0.5 + 0.5) * height;
-    const visible = state.labelPosition.z >= -1 && state.labelPosition.z <= 1 && x > -100 && x < width + 100 && y > -50 && y < height + 50;
-    element.style.display = visible ? "flex" : "none";
-    if (visible) {
-      element.style.left = `${x}px`;
-      element.style.top = `${y}px`;
-    }
-  };
-  state.roomLabels.forEach((label) => place(label.element, label.position));
+  const candidates = [];
+  state.roomLabels.forEach((label) => candidates.push({ element: label.element, position: label.position, priority: state.options.showNames ? 1 : 2 }));
   state.workers.forEach((worker) => {
     if (!worker.nameLabel) return;
-    worker.nameLabel.style.display = state.options.showNames ? "flex" : "none";
-    if (state.options.showNames) {
-      state.labelPosition.set(worker.group.position.x, worker.group.position.y + 2.48, worker.group.position.z);
-      place(worker.nameLabel, state.labelPosition);
+    worker.nameLabel.style.display = "none";
+    const selected = worker.person.id === state.selectedEmployee;
+    if (!state.options.showNames && !selected) return;
+    candidates.push({
+      element: worker.nameLabel,
+      position: { x: worker.group.position.x, y: worker.group.position.y + 2.48, z: worker.group.position.z },
+      priority: selected ? 3 : 2
+    });
+  });
+  const projected = candidates.map((candidate) => {
+    state.labelPosition.copy(candidate.position).project(state.camera);
+    return Object.assign(candidate, {
+      x: (state.labelPosition.x * 0.5 + 0.5) * width,
+      y: (-state.labelPosition.y * 0.5 + 0.5) * height,
+      depth: state.labelPosition.z
+    });
+  }).sort((first, second) => second.priority - first.priority);
+  const placed = [];
+  projected.forEach((candidate) => {
+    const { element, x, y, depth } = candidate;
+    const onScreen = depth >= -1 && depth <= 1 && x > -100 && x < width + 100 && y > -50 && y < height + 50;
+    if (!onScreen) {
+      element.style.display = "none";
+      return;
     }
+    element.style.display = "flex";
+    element.style.left = `${x}px`;
+    element.style.top = `${y}px`;
+    const labelWidth = element.offsetWidth;
+    const labelHeight = element.offsetHeight;
+    const bounds = { left: x - labelWidth / 2 - 5, right: x + labelWidth / 2 + 5, top: y - labelHeight - 5, bottom: y + 5 };
+    const overlaps = placed.some((other) => bounds.left < other.right && bounds.right > other.left && bounds.top < other.bottom && bounds.bottom > other.top);
+    if (overlaps) {
+      element.style.display = "none";
+      return;
+    }
+    placed.push(bounds);
   });
 }
 
@@ -632,7 +658,7 @@ function buildOffice() {
   return state;
 }
 
-function buildDesk(scene, position, hue) {
+function buildDesk(scene, position, departmentColor) {
   const group = new THREE.Group();
   const wood = material("#a89070");
   const top = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.14, 0.78), wood);
@@ -648,7 +674,8 @@ function buildDesk(scene, position, hue) {
   monitor.position.set(0, 1.29, -0.22);
   monitor.castShadow = true;
   group.add(monitor);
-  const screen = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.36, 0.025), material(new THREE.Color().setHSL(hue, 0.42, 0.36), 0.4, { emissive: new THREE.Color().setHSL(hue, 0.55, 0.2) }));
+  const screenColor = new THREE.Color(departmentColor).multiplyScalar(0.82);
+  const screen = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.36, 0.025), material(screenColor, 0.4, { emissive: screenColor.clone().multiplyScalar(0.45) }));
   screen.position.set(0, 1.29, -0.173);
   group.add(screen);
   const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.055, 0.23, 8), material("#73757a"));
@@ -663,10 +690,10 @@ function buildDesk(scene, position, hue) {
   return group;
 }
 
-function buildWorker(person, position) {
+function buildWorker(person, position, departmentColor) {
   const group = new THREE.Group();
-  const hue = ((person.name.charCodeAt(0) * 19 + person.name.length * 37) % 360) / 360;
-  const shirtColor = new THREE.Color().setHSL(hue, 0.48, 0.55);
+  const departmentHsl = new THREE.Color(departmentColor).getHSL({});
+  const shirtColor = new THREE.Color().setHSL(departmentHsl.h, 0.38, 0.53);
   const skin = material("#d4ae91");
   const shirt = material(shirtColor);
   const dark = material("#39383c");
@@ -758,7 +785,7 @@ function buildWorker(person, position) {
     }
   });
   state.scene.add(group);
-  return { name: person.name, group, leftLeg, rightLeg, leftArm, rightArm, cup, selectionRing, nameLabel: null, nameLabelCopy: null, home: new THREE.Vector3(position.x, WORKER_GROUND, position.z), lookTarget: new THREE.Vector3(position.x, WORKER_GROUND, position.z - 1), status: person.status, phase: Math.random() * Math.PI * 2, person, path: [], pathIndex: 0, pathKey: "", wanderState: "waiting", nextWanderAt: Date.now() + 5000 + Math.random() * 15000, wanderUntil: 0, wanderTarget: new THREE.Vector3(position.x, WORKER_GROUND, position.z), wanderBounds: null };
+  return { name: person.name, group, shirt, leftLeg, rightLeg, leftArm, rightArm, cup, selectionRing, nameLabel: null, nameLabelCopy: null, home: new THREE.Vector3(position.x, WORKER_GROUND, position.z), lookTarget: new THREE.Vector3(position.x, WORKER_GROUND, position.z - 1), status: person.status, phase: Math.random() * Math.PI * 2, person, path: [], pathIndex: 0, pathKey: "", wanderState: "waiting", nextWanderAt: Date.now() + 5000 + Math.random() * 15000, wanderUntil: 0, wanderTarget: new THREE.Vector3(position.x, WORKER_GROUND, position.z), wanderBounds: null };
 }
 
 function buildCamera() {
@@ -895,20 +922,24 @@ function updateWorkers(employees) {
       else home.set(center.x - 1.1, WORKER_GROUND, center.z - 2.35 + ((count % 2) * 1.5));
     }
     if (!state.workers.has(person.id)) {
-      buildDesk(state.scene, { x: home.x, z: home.z - 0.58 }, ((person.name.charCodeAt(0) * 19 + person.name.length * 37) % 360) / 360);
-      state.workers.set(person.id, buildWorker(person, home));
+      buildDesk(state.scene, { x: home.x, z: home.z - 0.58 }, DEPARTMENT_COLORS[index]);
+      state.workers.set(person.id, buildWorker(person, home, DEPARTMENT_COLORS[index]));
     }
     const worker = state.workers.get(person.id);
     worker.person = person;
+    worker.department = workerKey;
     worker.status = person.status;
+    const departmentHsl = new THREE.Color(DEPARTMENT_COLORS[index]).getHSL({});
+    worker.shirt.material.color.setHSL(departmentHsl.h, 0.38, 0.53);
     worker.home.copy(home);
     if (!worker.nameLabel) {
-      const hue = (person.name.charCodeAt(0) * 19 + person.name.length * 37) % 360;
-      const created = makeWorldLabel("employee", person.name, `hsl(${hue} 56% 50%)`);
+      const created = makeWorldLabel("employee", person.name, DEPARTMENT_COLORS[index]);
       worker.nameLabel = created.element;
       worker.nameLabelCopy = created.copy;
       state.labelLayer?.appendChild(worker.nameLabel);
     }
+    worker.nameLabel.style.setProperty("--department-color", DEPARTMENT_COLORS[index]);
+    worker.nameLabel.querySelector(".office-label-dot").style.backgroundColor = DEPARTMENT_COLORS[index];
     if (workerKey === "Software Development" && /devops/i.test(person.role || "")) {
       worker.wanderBounds = { minX: SERVER_ROOM.x - SERVER_ROOM.width / 2 + 0.55, maxX: SERVER_ROOM.x + SERVER_ROOM.width / 2 - 0.55, minZ: SERVER_ROOM.z - SERVER_ROOM.depth / 2 + 0.55, maxZ: SERVER_ROOM.z + SERVER_ROOM.depth / 2 - 0.55 };
     } else {
@@ -919,8 +950,6 @@ function updateWorkers(employees) {
     worker.cup.visible = person.status === "Coffee";
     if (worker.name !== person.name) {
       worker.nameLabelCopy.textContent = person.name;
-      const hue = (person.name.charCodeAt(0) * 19 + person.name.length * 37) % 360;
-      worker.nameLabel.querySelector(".office-label-dot").style.backgroundColor = `hsl(${hue} 56% 50%)`;
       worker.name = person.name;
     }
     worker.group.traverse((child) => {
