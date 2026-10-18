@@ -99,6 +99,8 @@ button { color: inherit; }
 .office-fallback-eyebrow { margin-bottom: 5px; color: #8e8e8e; font-size: 8px; font-weight: 700; letter-spacing: .15em; }
 .office-fallback-title { margin: 0; color: #f0f0f0; font: 22px/1.15 var(--serif); letter-spacing: -.04em; }
 .office-fallback-badge { flex: 0 0 auto; padding: 6px 8px; border: 1px solid #393939; border-radius: 99px; color: #b2b2b2; font-size: 8px; font-weight: 650; letter-spacing: .08em; }
+.office-fallback-retry { flex: 0 0 auto; padding: 6px 9px; border: 1px solid #414141; border-radius: 99px; background: #222; color: #ddd; font-size: 9px; cursor: pointer; }
+.office-fallback-retry:hover { border-color: #777; background: #2a2a2a; }
 .office-fallback-notice { margin: 0; color: #929292; font-size: 10px; line-height: 1.4; }
 .office-fallback-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; transform: scale(var(--fallback-scale, 1)); transform-origin: center; transition: transform .18s ease; }
 .office-fallback-room { position: relative; display: flex; min-width: 0; min-height: 103px; flex-direction: column; gap: 12px; overflow: hidden; padding: 11px; border: 1px solid color-mix(in srgb, var(--department-color) 30%, #353535); border-radius: 12px; background: linear-gradient(145deg, color-mix(in srgb, var(--department-color) 9%, #1c1c1c), #191919 68%); }
@@ -453,6 +455,8 @@ tr[data-employee]:hover td { background: #1a1a1a; }
 .office-fallback-title { color: #252735; }
 .office-fallback-eyebrow, .office-fallback-notice { color: #72798a; }
 .office-fallback-badge { border-color: #d8dce4; background: rgba(255,255,255,.7); color: #606879; }
+.office-fallback-retry { border-color: #d8dce4; background: #fff; color: #3f4757; }
+.office-fallback-retry:hover { border-color: #9ba3b2; background: #f4f6fa; }
 .office-fallback-room { border-color: color-mix(in srgb, var(--department-color) 32%, #dfe3e9); background: linear-gradient(145deg, color-mix(in srgb, var(--department-color) 10%, #fff), #fff 76%); box-shadow: 0 5px 18px rgba(31,39,61,.045); }
 .office-fallback-room-heading h3 { color: #303544; }
 .office-fallback-count, .office-fallback-empty { color: #7a8190; }

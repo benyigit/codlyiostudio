@@ -840,6 +840,9 @@ import { createWorkspaceStore } from "./workspace-store.js";
           state.selectedEmployee = employeeId;
           state.currentPage = "employee";
           render();
+        }, function () {
+          office3DFailure = null;
+          render();
         });
         const sceneHint = officeScene.closest(".office-stage")?.querySelector(".scene-hint");
         if (sceneHint) sceneHint.textContent = "Interactive employee map · 2D mode";

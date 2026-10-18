@@ -930,7 +930,7 @@ function updateWorkers(employees) {
     worker.department = workerKey;
     worker.status = person.status;
     const departmentHsl = new THREE.Color(DEPARTMENT_COLORS[index]).getHSL({});
-    worker.shirt.material.color.setHSL(departmentHsl.h, 0.38, 0.53);
+    worker.shirt.color.setHSL(departmentHsl.h, 0.38, 0.53);
     worker.home.copy(home);
     if (!worker.nameLabel) {
       const created = makeWorldLabel("employee", person.name, DEPARTMENT_COLORS[index]);
@@ -1145,7 +1145,7 @@ export function mountOffice3D(container, employees, options = {}, onSelect, onHo
   return state.renderer.domElement;
 }
 
-export function mountOfficeFallback(container, employees, options = {}, onSelect) {
+export function mountOfficeFallback(container, employees, options = {}, onSelect, onRetry) {
   const fallback = document.createElement("div");
   fallback.className = "office-fallback";
   fallback.setAttribute("role", "group");
@@ -1168,11 +1168,16 @@ export function mountOfficeFallback(container, employees, options = {}, onSelect
   const badge = document.createElement("span");
   badge.className = "office-fallback-badge";
   badge.textContent = "2D BACKUP VIEW";
-  header.append(headingGroup, badge);
+  const retryButton = document.createElement("button");
+  retryButton.className = "office-fallback-retry";
+  retryButton.type = "button";
+  retryButton.textContent = "3D'yi yeniden dene";
+  retryButton.addEventListener("click", () => onRetry?.());
+  header.append(headingGroup, badge, retryButton);
 
   const notice = document.createElement("p");
   notice.className = "office-fallback-notice";
-  notice.textContent = "3D is unavailable in this browser. Your workspace is still ready.";
+  notice.textContent = "3D başlatılamadı. Çalışma alanın hazır; yeniden deneyebilirsin.";
 
   const grid = document.createElement("div");
   grid.className = "office-fallback-grid";
