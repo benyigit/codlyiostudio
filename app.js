@@ -159,6 +159,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
         workspaceMenuOpen: false,
         currentPage: "office",
         selectedEmployee: "",
+        employeeProfileTab: "overview",
         teamListOpen: false,
         managerPanelOpen: true,
         managerTab: "manager",
@@ -185,7 +186,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
       return {
         employees: seedEmployees(), goals: [], tasks: [], workflows: [], activity: [], meetings: [], directMessages: {}, settings: {}, workspaceProfile: null,
         workspaces: [{ id: "workspace-default", name: "Codlyio Studio", data: {} }], activeWorkspaceId: "workspace-default", workspaceMenuOpen: false,
-        currentPage: "office", selectedEmployee: "", managerTab: "manager", approvalTab: "Waiting",
+        currentPage: "office", selectedEmployee: "", employeeProfileTab: "overview", managerTab: "manager", approvalTab: "Waiting",
         teamListOpen: false, managerPanelOpen: true,
         taskTab: "Goals", taskFilter: "All", settingsTab: "General", integrationCategory: "Popular",
         integrationSearch: "", calendarDate: new Date(), calendarMode: "Month", showNames: false,
@@ -637,13 +638,37 @@ import { createWorkspaceStore } from "./workspace-store.js";
   }
 
   function openWorkspaceCreation() {
-    showModal("Create a workspace", '<p class="page-subtitle">Choose a name and type for your new workspace. Existing workspace data stays separate.</p><form id="create-workspace-form"><label class="auth-field"><span>Workspace name</span><input name="name" maxlength="60" required placeholder="e.g. Acme Studio"></label><div class="onboarding-grid"><label class="auth-field"><span>Workspace type</span><select name="type"><option value="Company">Company</option><option value="Personal">Personal workspace</option></select></label><label class="auth-field"><span>Industry</span><select name="industry"><option value="">Choose an industry</option><option>Technology</option><option>Creative &amp; design</option><option>Marketing</option><option>E-commerce</option><option>Education</option><option>Other</option></select></label></div><label class="auth-field"><span>What do you want to build?</span><textarea name="description" maxlength="280" rows="3" placeholder="Briefly describe your company, project, or goals…"></textarea></label><label class="auth-field"><span>Website <em>optional</em></span><input name="website" type="url" maxlength="200" placeholder="https://example.com"></label><div class="modal-actions"><button class="button" type="button" data-action="close-modal">Cancel</button><button class="button primary" type="submit">Create workspace</button></div></form>', "", "workspace-create-modal");
+    const body = '<p class="page-subtitle">Choose a name and type for your new workspace. Existing workspace data stays separate.</p>' +
+      '<form id="create-workspace-form" novalidate><label class="auth-field"><span>Workspace name</span><input name="name" data-workspace-name maxlength="60" aria-required="true" aria-describedby="workspace-name-error" placeholder="e.g. Acme Studio"><span id="workspace-name-error" class="workspace-form-error hidden" role="alert">Workspace name is required.</span></label>' +
+      '<div class="onboarding-grid"><label class="auth-field"><span>Workspace type</span><select name="type"><option value="Company">Company</option><option value="Personal">Personal workspace</option></select></label><label class="auth-field"><span>Industry</span><select name="industry"><option value="">Choose an industry</option><option>Technology</option><option>Creative &amp; design</option><option>Marketing</option><option>E-commerce</option><option>Education</option><option>Other</option></select></label></div>' +
+      '<label class="auth-field"><span>What do you want to build?</span><textarea name="description" maxlength="280" rows="3" placeholder="Briefly describe your company, project, or goals…"></textarea></label><label class="auth-field"><span>Website <em>optional</em></span><input name="website" type="url" maxlength="200" aria-describedby="workspace-website-error" placeholder="https://example.com"><span id="workspace-website-error" class="workspace-form-error hidden" role="alert">Enter a valid website URL.</span></label>' +
+      '<div class="modal-actions"><button class="button" type="button" data-action="close-modal">Cancel</button><button class="button primary" type="submit">Create workspace</button></div></form>';
+    showModal("Create a workspace", body, "", "workspace-create-modal");
   }
 
   function createWorkspace(form) {
     const data = new FormData(form);
     const name = String(data.get("name") || "").trim();
-    if (!name) return;
+    const nameInput = form.elements.namedItem("name");
+    const nameError = form.querySelector("#workspace-name-error");
+    const websiteInput = form.elements.namedItem("website");
+    const websiteError = form.querySelector("#workspace-website-error");
+    if (!name) {
+      nameError?.classList.remove("hidden");
+      nameInput?.setAttribute("aria-invalid", "true");
+      nameInput?.focus();
+      return;
+    }
+    nameError?.classList.add("hidden");
+    nameInput?.removeAttribute("aria-invalid");
+    if (websiteInput?.value.trim() && !websiteInput.validity.valid) {
+      websiteError?.classList.remove("hidden");
+      websiteInput.setAttribute("aria-invalid", "true");
+      websiteInput.focus();
+      return;
+    }
+    websiteError?.classList.add("hidden");
+    websiteInput?.removeAttribute("aria-invalid");
     const now = new Date().toISOString();
     const profile = {
       name: name,
@@ -908,14 +933,30 @@ import { createWorkspaceStore } from "./workspace-store.js";
   function renderEmployeeProfile() {
     const person = employee(state.selectedEmployee);
     if (!person) { state.currentPage = "employees"; return renderEmployees(); }
-    const permissionMarkup = person.permissions.map(function (permission) { return '<span class="capability">' + esc(permission) + '</span>'; }).join("");
+    const permissionMarkup = (Array.isArray(person.permissions) ? person.permissions : []).map(function (permission) { return '<span class="capability">' + esc(permission) + '</span>'; }).join("");
     const providerOptions = '<option value="">Not configured</option>' + PROVIDERS.map(function (provider) { return '<option value="' + esc(provider) + '" ' + (person.provider === provider ? "selected" : "") + '>' + esc(provider) + '</option>'; }).join("");
     const baseUrl = person.baseUrl || PROVIDER_URLS[person.provider] || "";
     const route = state.serverRoutes[person.id];
     const keyExists = Boolean(route && route.keyConfigured);
     const routeMatches = Boolean(route && route.provider === person.provider && route.model === person.model && route.baseUrl === person.baseUrl);
     const routeState = !state.apiOnline ? "Local runtime is offline" : routeMatches && (keyExists || person.provider === "Ollama" || person.provider === "LM Studio") ? "Route ready" : "Save this route to the local runtime";
-    return '<div class="page"><button class="button small" data-action="back-employees">← All employees</button><div class="profile-heading" style="margin-top:20px">' + employeeDot(person) + '<div><h1>' + esc(person.name) + '</h1><div class="profile-role">' + esc(person.role) + ' · ' + esc(person.department) + ' · ' + esc(person.tier) + ' model</div></div></div><div class="profile-layout"><div class="profile-main">' + renderEmployeeChat(person) + '<section class="card"><div class="section-title">RIGHT NOW <span class="status-badge">' + esc(person.status) + '</span></div><p class="muted" style="font-size:10px;margin:0">' + (person.status === "Working" ? "Working on a task" : person.status === "Offline" ? "Not available for work" : "Available for work") + '</p></section><section class="card"><div class="section-title">STANDING INSTRUCTIONS</div><p class="field-help">Applied to every task this employee works on.</p><textarea class="field" id="employee-instructions" style="width:100%;min-height:80px" placeholder="Add instructions for this employee…">' + esc(person.instructions) + '</textarea><button class="button small" data-action="save-instructions" data-employee="' + esc(person.id) + '">Save instructions</button></section><section class="card"><div class="section-title">CAPABILITIES <span class="muted">Planned tool access</span></div><div class="capability-list">' + permissionMarkup + '</div><p class="field-help" style="margin-top:11px">Tool access and approval checks are not connected yet.</p></section><section class="card"><div class="section-title">SKILLS</div><p style="margin:0;color:#c6c5c0;font-size:10px;line-height:1.6">' + esc(person.skills) + '</p></section></div><div class="profile-side"><section class="card"><div class="section-title">AI PROVIDER & MODEL</div><p class="field-help">Each employee can use a separate provider, model and endpoint.</p><div class="route-state">' + esc(routeState) + '</div><div class="field"><label for="employee-provider">Provider</label><select id="employee-provider" data-provider-for="' + esc(person.id) + '">' + providerOptions + '</select></div><div class="field"><label for="employee-model">Model ID</label><input id="employee-model" value="' + esc(person.model) + '" placeholder="Enter a model ID" data-model-for="' + esc(person.id) + '"></div><div class="field"><label for="employee-url">Base URL</label><input id="employee-url" value="' + esc(baseUrl) + '" placeholder="https://…" data-url-for="' + esc(person.id) + '"></div><div class="field"><label for="employee-key">API key</label><input id="employee-key" type="password" placeholder="' + (keyExists ? "Key configured in local runtime" : "Enter key for this session") + '" autocomplete="off"><span class="field-help">The key is sent only to this local runtime, held in memory, and cleared when the server exits. The selected provider receives the model prompt.</span></div><button class="button primary" data-action="save-provider" data-employee="' + esc(person.id) + '">Save route</button>' + (keyExists ? '<button class="button small" style="margin-left:6px" data-action="clear-provider-key" data-employee="' + esc(person.id) + '">Clear key</button>' : '') + '<div class="demo-note">Provider, model and endpoint are stored in your workspace; provider keys remain on this device.</div></section><section class="card"><div class="section-title">PROFILE</div><div class="field"><label for="employee-name">Name</label><input id="employee-name" value="' + esc(person.name) + '" data-name-for="' + esc(person.id) + '"></div><button class="button small" data-action="save-name" data-employee="' + esc(person.id) + '">Save name</button></section><section class="card"><div class="section-title">RECENT TASKS</div>' + (state.tasks.filter(function (task) { return task.assigneeId === person.id || task.assignee === person.name; }).length ? '<p>Tasks listed on the Tasks page.</p>' : '<p class="muted" style="font-size:10px">No tasks yet.</p>') + '</section></div></div></div>';
+    const employeeTasks = state.tasks.filter(function (task) { return task.assigneeId === person.id || task.assignee === person.name; });
+    const latestTasks = employeeTasks.slice(0, 5);
+    const currentTask = employeeTasks.find(function (task) { return task.status === "Running"; }) || employeeTasks.find(function (task) { return task.status === "Planned"; });
+    const taskRows = latestTasks.length ? latestTasks.map(function (task) {
+      const statusClass = String(task.status || "planned").toLowerCase().replace(/[^a-z]+/g, "-");
+      return '<button class="employee-task-row" type="button" data-action="view-task" data-task="' + esc(task.id) + '"><span class="employee-task-mark ' + statusClass + '"></span><span class="employee-task-copy"><strong>' + esc(task.title) + '</strong><small>' + esc(task.department || person.department) + '</small></span><span class="employee-task-state">' + esc(task.status || "Planned") + '</span><span class="employee-task-arrow" aria-hidden="true">↗</span></button>';
+    }).join("") : '<div class="employee-empty-state"><span class="employee-empty-icon" aria-hidden="true">◌</span><strong>No tasks yet</strong><span>Assigned work and its progress will appear here.</span></div>';
+    const tabs = ["overview", "messages", "configuration"].map(function (tab) {
+      const active = (state.employeeProfileTab || "overview") === tab;
+      const label = tab === "overview" ? "Overview" : tab === "messages" ? "Messages" : "Configuration";
+      return '<button class="employee-profile-tab ' + (active ? "active" : "") + '" type="button" role="tab" aria-selected="' + active + '" data-employee-profile-tab="' + tab + '">' + label + (tab === "messages" && state.directMessages[person.id]?.length ? '<span class="employee-tab-count">' + state.directMessages[person.id].length + '</span>' : '') + '</button>';
+    }).join("");
+    const overview = '<div class="employee-overview-grid"><div class="employee-overview-main"><section class="employee-panel employee-current-work"><div class="employee-panel-heading"><div><span class="employee-kicker">CURRENT ASSIGNMENT</span><h2>' + (currentTask ? esc(currentTask.title) : "No active assignment") + '</h2></div><span class="employee-status-pill ' + (person.status === "Working" ? "working" : "") + '"><i></i>' + esc(person.status) + '</span></div><p>' + (currentTask ? esc(currentTask.deliverable || "This employee is assigned to this task.") : person.status === "Offline" ? "This employee is currently unavailable." : "When the Manager assigns work, the live task will show here.") + '</p>' + (currentTask ? '<button class="button small employee-open-task" type="button" data-action="view-task" data-task="' + esc(currentTask.id) + '">Open assignment <span aria-hidden="true">↗</span></button>' : '') + '</section><section class="employee-panel employee-task-panel"><div class="employee-panel-heading"><div><span class="employee-kicker">WORK HISTORY</span><h2>Recent tasks</h2></div><span class="employee-panel-count">' + employeeTasks.length + '</span></div><div class="employee-task-list">' + taskRows + '</div></section></div><aside class="employee-overview-aside"><section class="employee-panel employee-summary-panel"><span class="employee-kicker">EMPLOYEE PROFILE</span><dl><div><dt>Department</dt><dd>' + esc(person.department) + '</dd></div><div><dt>Role</dt><dd>' + esc(person.role) + '</dd></div><div><dt>Model tier</dt><dd>' + esc(person.tier) + '</dd></div><div><dt>Provider</dt><dd>' + esc(person.provider || "Not configured") + '</dd></div></dl></section><section class="employee-panel employee-summary-panel"><div class="employee-panel-heading"><div><span class="employee-kicker">SKILLS</span><h2>Specialties</h2></div></div><p class="employee-skill-copy">' + esc(person.skills || "No skills listed") + '</p></section><section class="employee-panel employee-summary-panel"><div class="employee-panel-heading"><div><span class="employee-kicker">CAPABILITIES</span><h2>Access profile</h2></div></div><div class="capability-list">' + permissionMarkup + '</div><p class="employee-config-note">Planned permissions only; tool access and approval checks are not connected.</p></section></aside></div>';
+    const configuration = '<div class="employee-configuration-grid"><section class="employee-panel employee-route-panel"><div class="employee-panel-heading"><div><span class="employee-kicker">MODEL ROUTING</span><h2>Provider & model</h2></div><span class="employee-route-state ' + (routeMatches && state.apiOnline ? "ready" : "") + '"><i></i>' + esc(routeState) + '</span></div><p class="employee-panel-description">Choose the model route this employee uses. Keys stay in the local runtime.</p><div class="employee-route-fields"><div class="field"><label for="employee-provider">Provider</label><select id="employee-provider" data-provider-for="' + esc(person.id) + '">' + providerOptions + '</select></div><div class="field"><label for="employee-model">Model ID</label><input id="employee-model" value="' + esc(person.model) + '" placeholder="Enter a model ID" data-model-for="' + esc(person.id) + '"></div><div class="field"><label for="employee-url">Base URL</label><input id="employee-url" value="' + esc(baseUrl) + '" placeholder="https://…" data-url-for="' + esc(person.id) + '"></div><div class="field"><label for="employee-key">API key</label><input id="employee-key" type="password" placeholder="' + (keyExists ? "Key configured in local runtime" : "Enter key for this session") + '" autocomplete="off"><span class="field-help">The key is held in local runtime memory and cleared when the server exits. Prompts are sent to the selected provider.</span></div></div><div class="employee-form-actions"><button class="button primary" type="button" data-action="save-provider" data-employee="' + esc(person.id) + '">Save route</button>' + (keyExists ? '<button class="button" type="button" data-action="clear-provider-key" data-employee="' + esc(person.id) + '">Clear key</button>' : '') + '</div></section><div class="employee-configuration-side"><section class="employee-panel"><div class="employee-panel-heading"><div><span class="employee-kicker">EMPLOYEE PROFILE</span><h2>Identity</h2></div></div><div class="field"><label for="employee-name">Display name</label><input id="employee-name" value="' + esc(person.name) + '" data-name-for="' + esc(person.id) + '"></div><button class="button" type="button" data-action="save-name" data-employee="' + esc(person.id) + '">Save name</button></section><section class="employee-panel"><div class="employee-panel-heading"><div><span class="employee-kicker">WORKING AGREEMENT</span><h2>Standing instructions</h2></div></div><p class="employee-panel-description">Applied to every task this employee works on.</p><textarea class="employee-instructions" id="employee-instructions" placeholder="Add instructions for this employee…">' + esc(person.instructions || "") + '</textarea><button class="button" type="button" data-action="save-instructions" data-employee="' + esc(person.id) + '">Save instructions</button></section></div></div>';
+    const activeTab = state.employeeProfileTab || "overview";
+    const tabContent = activeTab === "messages" ? '<div class="employee-message-view">' + renderEmployeeChat(person) + '</div>' : activeTab === "configuration" ? configuration : overview;
+    return '<div class="page employee-detail-page"><div class="employee-page-toolbar"><button class="employee-back-button" type="button" data-action="back-employees"><span aria-hidden="true">←</span> All employees</button><span class="employee-page-caption">TEAM MEMBER / ' + esc(person.department) + '</span></div><header class="employee-hero" style="--employee-accent:' + esc(getDepartmentColor(person.department)) + '"><div class="employee-identity">' + employeeDot(person, "employee-avatar") + '<div class="employee-identity-copy"><span class="employee-kicker">' + esc(person.department) + ' · ' + esc(person.tier) + ' MODEL</span><h1>' + esc(person.name) + '</h1><p>' + esc(person.role) + '</p></div></div><div class="employee-hero-status"><span class="employee-status-pill ' + (person.status === "Working" ? "working" : "") + '"><i></i>' + esc(person.status) + '</span><span class="employee-hero-route"><i class="' + (routeMatches && state.apiOnline ? "ready" : "") + '"></i>' + esc(routeState) + '</span></div></header><nav class="employee-profile-tabs" role="tablist" aria-label="Employee details">' + tabs + '</nav><section class="employee-profile-content" role="tabpanel">' + tabContent + '</section></div>';
   }
 
   const INTEGRATIONS = [
@@ -1044,6 +1085,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
           selectedEmployee: state.selectedEmployee
         }, function (employeeId) {
           state.selectedEmployee = employeeId;
+          state.employeeProfileTab = "overview";
           state.currentPage = "employee";
           render();
         }, function (person, event, canvasRect) {
@@ -1070,6 +1112,7 @@ import { createWorkspaceStore } from "./workspace-store.js";
           selectedEmployee: state.selectedEmployee
         }, function (employeeId) {
           state.selectedEmployee = employeeId;
+          state.employeeProfileTab = "overview";
           state.currentPage = "employee";
           render();
         }, function () {
@@ -1504,13 +1547,14 @@ import { createWorkspaceStore } from "./workspace-store.js";
     const nav = target.closest("[data-page]");
     if (nav) {
       const employeeId = nav.dataset.employee;
-      if (employeeId) { state.selectedEmployee = employeeId; state.currentPage = "employee"; render(); return; }
+      if (employeeId) { state.selectedEmployee = employeeId; state.employeeProfileTab = "overview"; state.currentPage = "employee"; render(); return; }
       navTo(nav.dataset.page);
       return;
     }
     const employeeItem = employeeByRow(target);
     if (employeeItem) {
       state.selectedEmployee = employeeItem.id;
+      state.employeeProfileTab = "overview";
       state.currentPage = "employee";
       render();
       return;
@@ -1619,6 +1663,8 @@ import { createWorkspaceStore } from "./workspace-store.js";
     if (integrationCategory) { state.integrationCategory = integrationCategory.dataset.integrationCategory; render(); return; }
     const calendarMode = target.closest("[data-calendar-mode]");
     if (calendarMode) { state.calendarMode = calendarMode.dataset.calendarMode; render(); return; }
+    const employeeProfileTab = target.closest("[data-employee-profile-tab]");
+    if (employeeProfileTab) { state.employeeProfileTab = employeeProfileTab.dataset.employeeProfileTab; render(); return; }
     const settingsTab = target.closest("[data-settings-tab]");
     if (settingsTab) { state.settingsTab = settingsTab.dataset.settingsTab; render(); return; }
     const autonomy = target.closest("[data-autonomy]");
@@ -1642,6 +1688,14 @@ import { createWorkspaceStore } from "./workspace-store.js";
 
   document.addEventListener("input", function (event) {
     if (event.target.id === "manager-input") syncSendButton();
+    if (event.target.matches("#create-workspace-form [name='name']") && event.target.value.trim()) {
+      event.target.removeAttribute("aria-invalid");
+      document.getElementById("workspace-name-error")?.classList.add("hidden");
+    }
+    if (event.target.matches("#create-workspace-form [name='website']") && event.target.validity.valid) {
+      event.target.removeAttribute("aria-invalid");
+      document.getElementById("workspace-website-error")?.classList.add("hidden");
+    }
     if (event.target.id === "integration-search") {
       state.integrationSearch = event.target.value;
       const caret = event.target.selectionStart;
