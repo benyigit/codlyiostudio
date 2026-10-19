@@ -375,6 +375,56 @@ function buildFloorLamp(scene, x, z) {
   return lamp;
 }
 
+function buildFluorescentPanel(scene, x, z) {
+  const casing = box(scene, [3.6, 0.1, 1.15], [x, 4.55, z], "#bbb9b2", { castShadow: false });
+  casing.material.emissive = new THREE.Color("#c9c8c1").multiplyScalar(0.18);
+  box(scene, [3.28, 0.025, 0.86], [x, 4.49, z], "#e7e5dc", { castShadow: false, material: { emissive: new THREE.Color("#e5e2d8"), emissiveIntensity: 0.32 } });
+}
+
+function buildOfficeWindows(scene, side) {
+  const x = side * 33.65;
+  box(scene, [0.34, 0.45, 65], [x, 0.24, 4], "#bab8b0", { castShadow: false });
+  box(scene, [0.34, 0.3, 65], [x, 2.68, 4], "#c9c7bf", { castShadow: false });
+  for (let z = -25; z <= 30; z += 11) {
+    const glass = box(scene, [0.08, 2.02, 9.25], [x - side * 0.08, 1.52, z], "#a9b9b6", { castShadow: false, material: { transparent: true, opacity: 0.44, roughness: 0.2, metalness: 0.04 } });
+    glass.material.side = THREE.DoubleSide;
+    box(scene, [0.13, 2.18, 0.13], [x - side * 0.12, 1.52, z - 4.62], "#9a9991", { castShadow: false });
+    box(scene, [0.13, 2.18, 0.13], [x - side * 0.12, 1.52, z + 4.62], "#9a9991", { castShadow: false });
+    for (let blind = 0; blind < 7; blind += 1) {
+      box(scene, [0.1, 0.018, 8.85], [x - side * 0.18, 0.82 + blind * 0.21, z], "#dedbd1", { castShadow: false });
+    }
+  }
+}
+
+function buildFilingCabinet(scene, x, z, rotation = 0) {
+  const cabinet = new THREE.Group();
+  box(cabinet, [0.84, 1.26, 0.76], [0, 0.66, 0], "#858781");
+  for (let drawer = 0; drawer < 3; drawer += 1) {
+    const y = 0.24 + drawer * 0.39;
+    box(cabinet, [0.76, 0.34, 0.04], [0, y, 0.4], drawer % 2 ? "#a1a29b" : "#999a93", { castShadow: false });
+    box(cabinet, [0.14, 0.025, 0.035], [0, y + 0.055, 0.43], "#666963", { castShadow: false });
+  }
+  cabinet.position.set(x, 0, z);
+  cabinet.rotation.y = rotation;
+  scene.add(cabinet);
+  return cabinet;
+}
+
+function buildWaterCooler(scene, x, z) {
+  const cooler = new THREE.Group();
+  box(cooler, [0.66, 0.94, 0.66], [0, 0.51, 0], "#d2d0c9");
+  box(cooler, [0.48, 0.52, 0.035], [0, 0.58, 0.35], "#a9b9b5", { castShadow: false, material: { transparent: true, opacity: 0.5, roughness: 0.18 } });
+  const bottle = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.27, 0.46, 12), material("#8da9a9", 0.28, { transparent: true, opacity: 0.74 }));
+  bottle.position.y = 1.23;
+  cooler.add(bottle);
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.15, 10), material("#9db7b5", 0.3, { transparent: true, opacity: 0.75 }));
+  neck.position.y = 1.53;
+  cooler.add(neck);
+  cooler.position.set(x, 0, z);
+  scene.add(cooler);
+  return cooler;
+}
+
 function buildDepartmentDecor(scene, department, index, x, z) {
   const color = DEPARTMENT_COLORS[index];
   const rug = new THREE.Mesh(new THREE.BoxGeometry(8.8, 0.045, 7.4), material(index === 10 ? "#d48fba" : color, 0.96, { transparent: true, opacity: index === 10 ? 0.48 : 0.2 }));
@@ -480,12 +530,12 @@ function buildMainEntrance(scene) {
     box(scene, [0.055, 0.78, 0.08], [side * 1.88, 1.2, 36.9], "#d2b366");
   });
   box(scene, [0.14, 2.55, 0.16], [0, 1.25, 37], "#5d5550");
-  const sign = makeLabel("Codly Office · Welcome", "#282c32", "#f2d99b");
+  const sign = makeLabel("Codlyio · Office", "#454640", "#ece9df");
   sign.position.set(0, 3.18, 37.7);
   sign.scale.set(4.15, 0.88, 1);
   scene.add(sign);
   for (const x of [-2.5, 2.5]) {
-    const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 10), material("#ffdf9c", 0.3, { emissive: new THREE.Color("#ffc565"), emissiveIntensity: 1.1 }));
+    const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 10), material("#eee7d5", 0.3, { emissive: new THREE.Color("#d8d1bf"), emissiveIntensity: 0.3 }));
     lamp.position.set(x, 2.88, 36.85);
     scene.add(lamp);
   }
@@ -493,12 +543,12 @@ function buildMainEntrance(scene) {
 
 function buildOffice() {
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color("#17181b");
-  scene.fog = new THREE.Fog("#17181b", 105, 185);
+  scene.background = new THREE.Color("#262725");
+  scene.fog = new THREE.Fog("#262725", 105, 185);
 
-  const hemisphere = new THREE.HemisphereLight("#fff4dd", "#4b5263", 2.15);
+  const hemisphere = new THREE.HemisphereLight("#fffaf0", "#575954", 2.25);
   scene.add(hemisphere);
-  const keyLight = new THREE.DirectionalLight("#fff3d8", 3.25);
+  const keyLight = new THREE.DirectionalLight("#fff7e8", 3.05);
   keyLight.position.set(-34, 58, 38);
   keyLight.castShadow = true;
   keyLight.shadow.mapSize.set(2048, 2048);
@@ -508,28 +558,21 @@ function buildOffice() {
   keyLight.shadow.camera.bottom = -48;
   keyLight.shadow.bias = -0.0004;
   scene.add(keyLight);
-  const fillLight = new THREE.PointLight("#9a8cf8", 48, 120, 2);
+  const fillLight = new THREE.PointLight("#e7e5dc", 28, 120, 2);
   fillLight.position.set(0, 8, 4);
   scene.add(fillLight);
 
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), material("#1b1c20", 0.98));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), material("#292a28", 0.98));
   ground.rotation.x = -Math.PI / 2;
   ground.position.y = -0.68;
   ground.receiveShadow = true;
   scene.add(ground);
 
-  box(scene, [68, 0.7, 66], [0, -0.35, 4], "#514d48");
-  box(scene, [67.5, 0.12, 65.5], [0, 0.03, 4], "#d5d1c4", { castShadow: false });
-
-  // Wide tiled corridors link the enclosed department rooms.
-  [-16, 0, 16].forEach((x) => {
-    box(scene, [3.8, 0.035, 50], [x, 0.105, 0], "#bdb8ad", { castShadow: false });
-    for (let z = -22; z <= 22; z += 4) box(scene, [3.8, 0.012, 0.045], [x, 0.13, z], "#d3cfc5", { castShadow: false });
-  });
-  [-8, 8].forEach((z) => {
-    box(scene, [64, 0.035, 3.8], [0, 0.105, z], "#bdb8ad", { castShadow: false });
-    for (let x = -30; x <= 30; x += 4) box(scene, [0.045, 0.012, 3.8], [x, 0.13, z], "#d3cfc5", { castShadow: false });
-  });
+  box(scene, [68, 0.7, 66], [0, -0.35, 4], "#5d5b54");
+  box(scene, [67.5, 0.12, 65.5], [0, 0.03, 4], "#838179", { castShadow: false });
+  [-16, 0, 16].forEach((x) => box(scene, [1.45, 0.018, 57], [x, 0.112, 2], "#8b8982", { castShadow: false }));
+  [-8, 8].forEach((z) => box(scene, [65, 0.018, 1.45], [0, 0.112, z], "#8b8982", { castShadow: false }));
+  COLS.forEach((x) => ROWS.forEach((z) => buildFluorescentPanel(scene, x, z)));
 
   const roomCenters = new Map();
   state.roomLabels = [];
@@ -539,70 +582,54 @@ function buildOffice() {
     const x = COLS[col];
     const z = ROWS[row];
     roomCenters.set(department, { x, z, index });
-    buildWoodFloor(scene, x, z, ["#d1ad79", "#c7a777", "#d6b985", "#c9a978"][index % 4]);
-    const entranceSide = col === 0 || col === 1 ? 1 : -1;
-    state.roomLabels.push({ text: department, color: DEPARTMENT_COLORS[index], position: new THREE.Vector3(x, 5.4, z - 5.6), element: null, copy: null });
-    addRoomDoorWalls(scene, x, z, col);
-    buildDepartmentDecor(scene, department, index, x, z);
-    buildPlanter(scene, department === "Software Development" ? x - 4.45 : x + 4.45, z + 4.3, 0.85);
+    state.roomLabels.push({ text: department, color: DEPARTMENT_COLORS[index], position: new THREE.Vector3(x, 3.5, z - 5.25), element: null, copy: null });
   });
   buildServerRoom(scene);
 
-  // Exterior walls leave a broad front entrance into a furnished lobby.
-  box(scene, [0.32, 2.8, 66], [-34, 1.4, 4], "#a9a79f");
-  box(scene, [0.32, 2.8, 66], [34, 1.4, 4], "#a9a79f");
+  buildOfficeWindows(scene, -1);
+  buildOfficeWindows(scene, 1);
   box(scene, [68, 2.8, 0.32], [0, 1.4, -29], "#a9a79f");
   box(scene, [30.5, 2.8, 0.32], [-18.05, 1.4, 37], "#a9a79f");
   box(scene, [30.5, 2.8, 0.32], [18.05, 1.4, 37], "#a9a79f");
   buildMainEntrance(scene);
 
-  // Corridor accessories and a relaxed reception area make the floor feel occupied.
   buildBench(scene, -31.8, -4.5, Math.PI / 2);
   buildBench(scene, 31.8, 3.5, -Math.PI / 2);
-  buildPlanter(scene, -31.8, 2, 1.05);
-  buildPlanter(scene, 31.8, -6, 1.05);
-  buildWallArt(scene, -30.05, -10, "#7e9a91", 0);
-  buildWallArt(scene, 30.05, 10, "#927bb4", Math.PI);
+  buildPlanter(scene, -31.8, 2, 0.85);
+  buildPlanter(scene, 31.8, -6, 0.85);
+  buildFilingCabinet(scene, -30.5, -16, Math.PI / 2);
+  buildFilingCabinet(scene, 30.5, 14, -Math.PI / 2);
   buildBench(scene, -10.4, -8, Math.PI / 2);
   buildBench(scene, 10.4, 8, -Math.PI / 2);
-  buildPlanter(scene, -14.6, -8, 0.75);
-  buildPlanter(scene, 14.6, 8, 0.75);
-  [-16, 0, 16].forEach((x, index) => {
-    const wayfinding = makeLabel(index === 1 ? "Main hall · A1—A4" : (index === 0 ? "North hall · B1—B4" : "East hall · C1—C4"), "#373b43", "#ece4d2");
-    wayfinding.position.set(x, 2.65, -8);
-    wayfinding.scale.set(4.2, 0.83, 1);
-    scene.add(wayfinding);
-  });
-  const lobbyRug = new THREE.Mesh(new THREE.BoxGeometry(31, 0.035, 10), material("#6e6972", 0.96));
+  const lobbyRug = new THREE.Mesh(new THREE.BoxGeometry(28, 0.035, 9), material("#77766f", 0.96));
   lobbyRug.position.set(0, 0.12, 27.2);
   scene.add(lobbyRug);
-  buildSofa(scene, -2.8, 27.5, Math.PI / 2);
-  buildSofa(scene, 2.8, 27.5, -Math.PI / 2);
-  const loungeTable = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.78, 0.14, 24), material("#b99a6d"));
+  buildSofa(scene, -3.1, 27.5, Math.PI / 2);
+  buildSofa(scene, 3.1, 27.5, -Math.PI / 2);
+  const loungeTable = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.78, 0.14, 24), material("#a59b88"));
   loungeTable.position.set(0, 0.56, 27.5);
   scene.add(loungeTable);
-  const loungeTableBase = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 0.58, 10), material("#68645c"));
+  const loungeTableBase = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 0.58, 10), material("#696a65"));
   loungeTableBase.position.set(0, 0.29, 27.5);
   scene.add(loungeTableBase);
-  buildFloorLamp(scene, -6.4, 27.3);
-  buildFloorLamp(scene, 6.4, 27.3);
-  buildPlanter(scene, -7, 31, 1.15);
-  buildPlanter(scene, 7, 31, 1.15);
-  box(scene, [4.8, 0.92, 0.95], [0, 0.72, 33.25], "#705a47");
-  box(scene, [4.95, 0.12, 1.05], [0, 1.23, 33.25], "#d2bd9b");
+  buildPlanter(scene, -7, 31, 0.9);
+  buildPlanter(scene, 7, 31, 0.9);
+  buildWaterCooler(scene, 9.2, 24.5);
+  box(scene, [4.8, 0.92, 0.95], [0, 0.72, 33.25], "#77766f");
+  box(scene, [4.95, 0.12, 1.05], [0, 1.23, 33.25], "#c4c0b6");
   box(scene, [0.78, 0.57, 0.08], [-1.0, 1.61, 33.12], "#313841", { castShadow: false });
-  const receptionScreen = box(scene, [0.62, 0.41, 0.025], [-1.0, 1.61, 33.07], "#84a4ac", { castShadow: false });
-  receptionScreen.material.emissive = new THREE.Color("#3c6672");
-  const receptionSign = makeLabel("Reception · Welcome", "#49433d", "#f4e5c1");
+  const receptionScreen = box(scene, [0.62, 0.41, 0.025], [-1.0, 1.61, 33.07], "#9baaa4", { castShadow: false });
+  receptionScreen.material.emissive = new THREE.Color("#29352f");
+  const receptionSign = makeLabel("Codlyio Office", "#454640", "#ece9df");
   receptionSign.position.set(0, 2.35, 33.25);
   receptionSign.scale.set(3.2, 0.65, 1);
   scene.add(receptionSign);
 
   // A small cafe: counter, machine, cups and a shared high table.
-  box(scene, [4.2, 0.3, 0.9], [-25, 0.82, 29.2], "#6b5347");
-  box(scene, [4.35, 0.13, 1.03], [-25, 1.02, 29.2], "#ded5c2");
-  box(scene, [0.85, 1.12, 0.68], [-26.1, 1.62, 29.0], "#3a3d45");
-  box(scene, [0.34, 0.18, 0.15], [-26.1, 2.26, 29.0], "#9484ef");
+  box(scene, [4.2, 0.3, 0.9], [-25, 0.82, 29.2], "#77766f");
+  box(scene, [4.35, 0.13, 1.03], [-25, 1.02, 29.2], "#c4c0b6");
+  box(scene, [0.85, 1.12, 0.68], [-26.1, 1.62, 29.0], "#525451");
+  box(scene, [0.34, 0.18, 0.15], [-26.1, 2.26, 29.0], "#9b9c93");
   const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.13, 0.22, 12), material("#f2eee2"));
   mug.position.set(-24.1, 1.23, 29.0);
   scene.add(mug);
@@ -614,13 +641,13 @@ function buildOffice() {
   cafeStem.position.set(CAFE_CENTER.x, 0.49, CAFE_CENTER.z);
   scene.add(cafeStem);
   [-1, 1].forEach((side) => buildChair(scene, CAFE_CENTER.x + side * 1.5, CAFE_CENTER.z, side < 0 ? Math.PI / 2 : -Math.PI / 2, 0.84));
-  const cafeSign = makeLabel("Cafe · coffee & water", "#51433b", "#fff0d5");
+  const cafeSign = makeLabel("Break room", "#4a4b46", "#e8e5dc");
   cafeSign.position.set(-25.4, 2.5, 31.0);
   cafeSign.scale.set(3.5, 0.78, 1);
   scene.add(cafeSign);
 
   // Meeting room table and chairs.
-  const tableTop = new THREE.Mesh(new THREE.CylinderGeometry(2.15, 2.15, 0.22, 32), material("#77624f"));
+  const tableTop = new THREE.Mesh(new THREE.CylinderGeometry(2.15, 2.15, 0.22, 32), material("#817565"));
   tableTop.position.set(MEETING_CENTER.x, 0.93, MEETING_CENTER.z);
   tableTop.castShadow = true;
   scene.add(tableTop);
@@ -633,14 +660,14 @@ function buildOffice() {
     const z = MEETING_CENTER.z + Math.sin(angle) * 3.15;
     buildChair(scene, x, z, -angle + Math.PI / 2, 0.9);
   }
-  const meetingSign = makeLabel("Team meeting", "#3c3b43", "#e8e2ff");
+  const meetingSign = makeLabel("Conference room", "#454640", "#e8e5dc");
   meetingSign.position.set(MEETING_CENTER.x, 2.75, 30.7);
   meetingSign.scale.set(3.1, 0.72, 1);
   scene.add(meetingSign);
   const screen = box(scene, [3.2, 1.8, 0.13], [MEETING_CENTER.x, 2.4, 31.15], "#393b43");
-  const screenFace = box(scene, [2.9, 1.5, 0.04], [MEETING_CENTER.x, 2.4, 31.04], "#8174d8", { castShadow: false });
-  screenFace.material.emissive = new THREE.Color("#3a326c");
-  screenFace.material.emissiveIntensity = 0.5;
+  const screenFace = box(scene, [2.9, 1.5, 0.04], [MEETING_CENTER.x, 2.4, 31.04], "#a1aaa5", { castShadow: false });
+  screenFace.material.emissive = new THREE.Color("#354039");
+  screenFace.material.emissiveIntensity = 0.18;
   screen.rotation.x = 0;
 
   const camera = new THREE.OrthographicCamera(-12, 12, 12, -12, 0.1, 150);
@@ -664,44 +691,105 @@ function buildOffice() {
 
 function buildDesk(scene, position, departmentColor) {
   const group = new THREE.Group();
-  const wood = material("#a89070");
+  const wood = material("#aaa79d");
   const top = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.14, 0.78), wood);
   top.position.y = 0.92;
   top.castShadow = true;
   group.add(top);
   [-0.62, 0.62].forEach((x) => [-0.26, 0.26].forEach((z) => {
-    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.86, 0.08), material("#827762"));
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.86, 0.08), material("#777975"));
     leg.position.set(x, 0.46, z);
     group.add(leg);
   }));
-  const monitor = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.48, 0.07), material("#33343a", 0.5));
-  monitor.position.set(0, 1.29, -0.22);
+  const monitor = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.55, 0.34), material("#72716b", 0.52));
+  monitor.position.set(0, 1.3, -0.22);
   monitor.castShadow = true;
   group.add(monitor);
-  const screenColor = new THREE.Color(departmentColor).multiplyScalar(0.82);
-  const screen = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.36, 0.025), material(screenColor, 0.4, { emissive: screenColor.clone().multiplyScalar(0.45) }));
-  screen.position.set(0, 1.29, -0.173);
+  const screenColor = new THREE.Color("#7d8d88").lerp(new THREE.Color(departmentColor), 0.08);
+  const screen = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.35, 0.025), material(screenColor, 0.42, { emissive: screenColor.clone().multiplyScalar(0.16) }));
+  screen.position.set(0, 1.3, -0.038);
   group.add(screen);
   const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.055, 0.23, 8), material("#73757a"));
   stand.position.set(0, 1.04, -0.22);
   group.add(stand);
-  const keyboard = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.025, 0.16), material("#484a4e"));
+  const keyboard = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.025, 0.16), material("#696b68"));
   keyboard.position.set(0, 1.02, 0.14);
   group.add(keyboard);
+
+  const cubicleFabric = material("#c2c0b8");
+  const cubicleFrame = material("#858681", 0.58, { metalness: 0.14 });
+  const partitions = [
+    { size: [2.82, 1.52, 0.12], position: [0, 1.04, -0.86] },
+    { size: [0.12, 1.52, 1.62], position: [-1.41, 1.04, -0.02] },
+    { size: [0.12, 1.52, 1.62], position: [1.41, 1.04, -0.02] }
+  ];
+  partitions.forEach((partition) => {
+    const panel = new THREE.Mesh(new THREE.BoxGeometry(...partition.size), cubicleFabric);
+    panel.position.set(...partition.position);
+    panel.castShadow = true;
+    group.add(panel);
+    const cap = new THREE.Mesh(new THREE.BoxGeometry(partition.size[0] + 0.035, 0.055, partition.size[2] + 0.035), cubicleFrame);
+    cap.position.set(partition.position[0], 1.82, partition.position[2]);
+    group.add(cap);
+  });
+  const paperStack = new THREE.Mesh(new THREE.BoxGeometry(0.27, 0.035, 0.2), material("#e5e2d9"));
+  paperStack.position.set(0.52, 1.02, 0.13);
+  group.add(paperStack);
+  const phone = new THREE.Mesh(new THREE.BoxGeometry(0.29, 0.07, 0.25), material("#4f514e"));
+  phone.position.set(-0.53, 1.01, 0.16);
+  group.add(phone);
+  const phoneDisplay = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.018, 0.06), material("#9ba89c", 0.45, { emissive: new THREE.Color("#303b31"), emissiveIntensity: 0.08 }));
+  phoneDisplay.position.set(-0.53, 1.052, 0.13);
+  group.add(phoneDisplay);
+  const handset = new THREE.Mesh(new THREE.CapsuleGeometry(0.026, 0.2, 4, 8), material("#363836"));
+  handset.position.set(-0.53, 1.105, 0.2);
+  handset.rotation.z = Math.PI / 2;
+  group.add(handset);
   group.position.set(position.x, 0, position.z);
   scene.add(group);
   buildChair(scene, position.x, position.z + 0.85, Math.PI, 0.78);
   return group;
 }
 
+function appearanceFor(person) {
+  const key = String(person.id || person.name || "teammate");
+  let hash = 2166136261;
+  for (let index = 0; index < key.length; index += 1) {
+    hash ^= key.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  let seed = hash >>> 0;
+  const next = (max) => {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    return seed % max;
+  };
+  const skinTones = ["#f0c8a7", "#d9a784", "#b97e61", "#8e5c48", "#704a3c", "#e5b99b", "#c78f72", "#f4d5bd"];
+  const hairTones = ["#302923", "#49352b", "#674a38", "#1f2224", "#8c6946", "#544c43", "#a8a29a"];
+  const styles = ["side-part", "crop", "curly", "long", "bun", "buzz", "bald", "waves"];
+  return {
+    skin: skinTones[next(skinTones.length)],
+    hair: hairTones[next(hairTones.length)],
+    hairStyle: styles[next(styles.length)],
+    eyes: ["#536d74", "#5c4638", "#3d5548", "#59606c", "#684b38"][next(5)],
+    faceWidth: 0.92 + next(6) * 0.035,
+    faceHeight: 1.01 + next(4) * 0.035,
+    glasses: next(4) === 0,
+    facialHair: next(4) === 0,
+    tie: next(3) === 0,
+    tieColor: ["#76505a", "#485967", "#8a7653", "#526b5d"][next(4)],
+    earring: next(6) === 0
+  };
+}
+
 function buildWorker(person, position, departmentColor) {
   const group = new THREE.Group();
   const departmentHsl = new THREE.Color(departmentColor).getHSL({});
-  const shirtColor = new THREE.Color().setHSL(departmentHsl.h, 0.38, 0.53);
-  const skin = material("#d4ae91");
+  const shirtColor = new THREE.Color().setHSL(departmentHsl.h, 0.26, 0.58);
+  const appearance = appearanceFor(person);
+  const skin = material(appearance.skin);
   const shirt = material(shirtColor);
-  const dark = material("#39383c");
-  const hair = material("#4d4039");
+  const dark = material("#373a3a");
+  const hair = material(appearance.hair);
 
   const shadow = new THREE.Mesh(new THREE.CircleGeometry(0.5, 20), new THREE.MeshBasicMaterial({ color: "#34312d", transparent: true, opacity: 0.24, depthWrite: false }));
   shadow.rotation.x = -Math.PI / 2;
@@ -721,25 +809,112 @@ function buildWorker(person, position, departmentColor) {
   rightLeg.position.x = 0.13;
   group.add(rightLeg);
 
-  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.25, 0.54, 5, 10), shirt);
+  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.25, 0.54, 5, 12), shirt);
   torso.position.y = 1.12;
   torso.castShadow = true;
   group.add(torso);
   const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.1, 0.16, 10), skin);
   neck.position.y = 1.52;
   group.add(neck);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.245, 18, 14), skin);
-  head.position.y = 1.77;
+  const faceGroup = new THREE.Group();
+  faceGroup.position.y = 1.77;
+  faceGroup.rotation.y = Math.PI;
+  group.add(faceGroup);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.27, 24, 18), skin);
+  head.scale.set(appearance.faceWidth, appearance.faceHeight, 0.96);
   head.castShadow = true;
-  group.add(head);
-  const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.25, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.52), hair);
-  hairCap.position.set(0, 1.83, -0.01);
-  group.add(hairCap);
-  [-0.085, 0.085].forEach((x) => {
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 6), dark);
-    eye.position.set(x, 1.78, 0.227);
-    group.add(eye);
+  faceGroup.add(head);
+  const addFaceMesh = (geometry, faceMaterial, x, y, z) => {
+    const mesh = new THREE.Mesh(geometry, faceMaterial);
+    mesh.position.set(x, y - 1.77, z);
+    faceGroup.add(mesh);
+    return mesh;
+  };
+  const addHairCap = (height = 0.55, radius = 0.275) => {
+    const cap = addFaceMesh(new THREE.SphereGeometry(radius, 20, 12, 0, Math.PI * 2, 0, Math.PI * height), hair, 0, 1.84, -0.008);
+    cap.scale.set(1, 0.92, 0.96);
+    return cap;
+  };
+  if (appearance.hairStyle === "side-part") {
+    addHairCap(0.48);
+    addFaceMesh(new THREE.SphereGeometry(0.115, 12, 9), hair, 0.06, 1.924, 0.11).scale.set(1.2, 0.55, 0.72);
+    const part = addFaceMesh(new THREE.BoxGeometry(0.012, 0.12, 0.16), material("#241f1c"), -0.035, 1.87, 0.18);
+    part.rotation.x = -0.22;
+  } else if (appearance.hairStyle === "crop") {
+    addHairCap(0.34, 0.245);
+    addFaceMesh(new THREE.SphereGeometry(0.15, 12, 8), hair, 0, 1.9, 0.13).scale.set(1.25, 0.42, 0.62);
+  } else if (appearance.hairStyle === "curly" || appearance.hairStyle === "waves") {
+    addHairCap(0.59, appearance.hairStyle === "curly" ? 0.29 : 0.275);
+    const curlCount = appearance.hairStyle === "curly" ? 9 : 5;
+    for (let curl = 0; curl < curlCount; curl += 1) {
+      const angle = (curl / curlCount) * Math.PI * 2;
+      const bump = addFaceMesh(new THREE.SphereGeometry(0.072, 10, 8), hair, Math.cos(angle) * 0.19, 1.87 + Math.sin(angle) * 0.025, Math.sin(angle) * 0.16 - 0.01);
+      bump.scale.set(1.1, 0.9, 1);
+    }
+  } else if (appearance.hairStyle === "long" || appearance.hairStyle === "bun") {
+    addHairCap(0.53, 0.275);
+    [-0.19, 0.19].forEach((side) => {
+      const lock = addFaceMesh(new THREE.SphereGeometry(0.105, 12, 9), hair, side, 1.67, -0.015);
+      lock.scale.set(0.72, appearance.hairStyle === "long" ? 2.2 : 1.2, 0.9);
+    });
+    if (appearance.hairStyle === "bun") addFaceMesh(new THREE.SphereGeometry(0.13, 12, 9), hair, 0, 1.99, -0.21);
+    else addFaceMesh(new THREE.SphereGeometry(0.14, 12, 8), hair, 0.03, 1.9, 0.13).scale.set(1.05, 0.48, 0.7);
+  } else if (appearance.hairStyle === "buzz") {
+    const buzz = addFaceMesh(new THREE.SphereGeometry(0.265, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.44), hair, 0, 1.83, -0.01);
+    buzz.scale.set(1, 0.9, 0.96);
+  }
+
+  const eyeWhite = material("#f1eee7");
+  const iris = material(appearance.eyes);
+  [-0.087, 0.087].forEach((x) => {
+    addFaceMesh(new THREE.SphereGeometry(0.043, 12, 9), eyeWhite, x, 1.79, 0.23);
+    addFaceMesh(new THREE.SphereGeometry(0.022, 10, 8), iris, x, 1.789, 0.265);
+    addFaceMesh(new THREE.SphereGeometry(0.011, 8, 6), dark, x, 1.789, 0.282);
+    const brow = addFaceMesh(new THREE.BoxGeometry(0.084, 0.018, 0.024), hair, x, 1.853, 0.24);
+    brow.rotation.z = x < 0 ? 0.08 : -0.08;
   });
+  [-0.235, 0.235].forEach((x) => addFaceMesh(new THREE.SphereGeometry(0.052, 10, 8), skin, x, 1.75, 0.005));
+  const nose = addFaceMesh(new THREE.ConeGeometry(0.045, 0.11, 7), skin, 0, 1.725, 0.255);
+  nose.rotation.x = Math.PI / 2;
+  const smileCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-0.06, 1.656 - 1.77, 0.235),
+    new THREE.Vector3(0, 1.646 - 1.77, 0.253),
+    new THREE.Vector3(0.06, 1.656 - 1.77, 0.235)
+  ]);
+  addFaceMesh(new THREE.TubeGeometry(smileCurve, 8, 0.008, 5, false), material("#714d41"), 0, 0, 0);
+
+  if (appearance.glasses) {
+    const frames = material("#35383a", 0.45, { metalness: 0.18 });
+    [-0.087, 0.087].forEach((x) => addFaceMesh(new THREE.TorusGeometry(0.054, 0.009, 5, 18), frames, x, 1.79, 0.245));
+    addFaceMesh(new THREE.BoxGeometry(0.045, 0.012, 0.012), frames, 0, 1.79, 0.245);
+    [-0.14, 0.14].forEach((x) => {
+      const arm = addFaceMesh(new THREE.BoxGeometry(0.08, 0.01, 0.012), frames, x, 1.79, 0.22);
+      arm.rotation.y = x < 0 ? -0.25 : 0.25;
+    });
+  }
+  if (appearance.facialHair) {
+    const beard = addFaceMesh(new THREE.SphereGeometry(0.16, 14, 10), hair, 0, 1.605, 0.09);
+    beard.scale.set(0.92, 0.52, 0.8);
+    [-0.045, 0.045].forEach((x) => addFaceMesh(new THREE.SphereGeometry(0.047, 9, 7), hair, x, 1.68, 0.205));
+  }
+  if (appearance.earring) {
+    const earring = material("#c1a975", 0.32, { metalness: 0.45 });
+    addFaceMesh(new THREE.TorusGeometry(0.027, 0.008, 5, 14), earring, 0.237, 1.704, 0.017);
+  }
+  if (appearance.tie) {
+    const tie = material(appearance.tieColor, 0.62);
+    const knot = addFaceMesh(new THREE.BoxGeometry(0.08, 0.085, 0.035), tie, 0, 1.435, 0.232);
+    knot.rotation.z = Math.PI / 4;
+    addFaceMesh(new THREE.BoxGeometry(0.075, 0.3, 0.04), tie, 0, 1.245, 0.244);
+    const tip = addFaceMesh(new THREE.ConeGeometry(0.055, 0.13, 4), tie, 0, 1.08, 0.245);
+    tip.rotation.x = Math.PI;
+  } else {
+    const collar = material("#dedbd2");
+    [-0.1, 0.1].forEach((x) => {
+      const point = addFaceMesh(new THREE.BoxGeometry(0.13, 0.13, 0.035), collar, x, 1.43, 0.22);
+      point.rotation.z = x < 0 ? -0.38 : 0.38;
+    });
+  }
 
   const leftArm = new THREE.Group();
   leftArm.position.set(-0.27, 1.34, 0);
@@ -779,6 +954,7 @@ function buildWorker(person, position, departmentColor) {
   selectionRing.visible = false;
   group.add(selectionRing);
 
+  group.scale.setScalar(1.12);
   group.position.set(position.x, WORKER_GROUND, position.z);
   group.rotation.y = Math.PI;
   group.userData.employeeId = person.id;
@@ -934,7 +1110,7 @@ function updateWorkers(employees) {
     worker.department = workerKey;
     worker.status = person.status;
     const departmentHsl = new THREE.Color(DEPARTMENT_COLORS[index]).getHSL({});
-    worker.shirt.color.setHSL(departmentHsl.h, 0.38, 0.53);
+    worker.shirt.color.setHSL(departmentHsl.h, 0.26, 0.58);
     worker.home.copy(home);
     if (!worker.nameLabel) {
       const created = makeWorldLabel("employee", person.name, DEPARTMENT_COLORS[index]);
